@@ -1,25 +1,37 @@
 #!/bin/bash
 
 APP_DIR="/opt/spotify-dude"
-DB_FILE="$APP_DIR/data/dude.db"
+CONF_FILE="$APP_DIR/data/dude.conf"
+DB_FILE=""
 
 function main() {
+    getDbFile
+
     if [ $# -eq 1 ]; then
         if [ "$1" == "--sqlite" ]; then
             if [ -f $DB_FILE ]; then
                 enterSqliteShell
             else
                 echo "App not installed yet. See the script source code."
-                exit 3
+                exit 4
             fi
         elif [ "$1" == "--installdb" ]; then
             installDb
         else
             echo "Wrong argument '$1'. See the script source code."
-            exit 2
+            exit 3
         fi
     else
         echo "Wrong arguments. See the script source code."
+        exit 2
+    fi
+}
+
+function getDbFile() {
+    if [ -f $CONF_FILE ]; then
+        DB_FILE=$(grep "DB_FILE" $CONF_FILE | cut -d "=" -f 2)
+    else
+        echo "You must fill out '$CONF_FILE' first. See 'README.md'."
         exit 1
     fi
 }
@@ -48,9 +60,8 @@ function installDb() {
 
         echo "DB successfully installed."
     else
-        echo "You must manually copy the app to '$APP_DIR/'' before install:"
-        echo "  'sudo cp <your-local-copy> /opt'"
-        exit 4
+        echo "You must clone the app to '$APP_DIR/'. See 'README.md'"
+        exit 5
     fi
 }
 
