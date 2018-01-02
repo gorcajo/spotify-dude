@@ -108,7 +108,7 @@ def roulette(must_send_mail=False):
         except:
             logger.warn("Exception happened:\n" + traceback.format_exc())
 
-    logger.debug("There is no more playlists to check")
+    logger.debug("There are no more playlists to check")
 
     if must_send_mail and there_were_changes:
         logger.debug("Preparing and sending the mail...")
