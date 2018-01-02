@@ -1,0 +1,4 @@
+__pycache__
+.vscode
+data/dude.db
+data/app.conf
