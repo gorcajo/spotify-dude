@@ -4,6 +4,7 @@
 
 import sys
 import random
+import traceback
 
 import logger
 import apiclient as api
@@ -24,10 +25,13 @@ def main():
         else:
             logger.info("Dude started")
 
-            if sys.argv[1] == ARGUMENTS["roulette"]:
-                roulette(must_send_mail=True)
-            elif sys.argv[1] == ARGUMENTS["roulette-test"]:
-                roulette(must_send_mail=False)
+            try:
+                if sys.argv[1] == ARGUMENTS["roulette"]:
+                    roulette(must_send_mail=True)
+                elif sys.argv[1] == ARGUMENTS["roulette-test"]:
+                    roulette(must_send_mail=False)
+            except:
+                logger.error("Exception happened:\n" + traceback.format_exc())
 
             logger.info("Finished, dude")
     else:
@@ -48,58 +52,61 @@ def roulette(must_send_mail=False):
     logger.debug("... found " + str(len(playlists)) + " playlists")
 
     for playlist in playlists:
+        try:
+            logger.debug("Getting all tracks in '" + playlist.name + "' from Spotify API...")
+            tracks = api.get_all_tracks_from_playlist(token, playlist.spotify_id)
+            logger.debug("... gotten " + str(len(tracks)) + " tracks")
 
-        logger.debug("Getting all tracks in '" + playlist.name + "' from Spotify API...")
-        tracks = api.get_all_tracks_from_playlist(token, playlist.spotify_id)
-        logger.debug("... gotten " + str(len(tracks)) + " tracks")
+            if playlist.songs_last_seen == len(tracks):
+                logger.debug("There are no changes, playlist skipped")
+                continue
+            else:
+                logger.debug("There are changes, an update will be made...")
+                there_were_changes = True
 
-        if playlist.songs_last_seen == len(tracks):
-            logger.debug("There are no changes, playlist skipped")
-            continue
-        else:
-            logger.debug("There are changes, an update will be made...")
-            there_were_changes = True
+            last_adder = ""
+            last_track_name = ""
+            last_track_artists = ""
 
-        last_adder = ""
-        last_track_name = ""
-        last_track_artists = ""
+            for playlist_track in tracks:
+                adder = db.find_user_by_spotify_id(playlist_track["added_by"]["id"])
+                track = playlist_track["track"]
 
-        for playlist_track in tracks:
-            adder = db.find_user_by_spotify_id(playlist_track["added_by"]["id"])
-            track = playlist_track["track"]
+                artists = ""
+                for track_artist in track["artists"]:
+                    artists += track_artist["name"] + ", "
+                artists = artists[:-2]
 
-            artists = ""
-            for track_artist in track["artists"]:
-                artists += track_artist["name"] + ", "
-            artists = artists[:-2]
+                last_adder = adder
+                last_track_name = track["name"]
+                last_track_artists = artists
 
-            last_adder = adder
-            last_track_name = track["name"]
-            last_track_artists = artists
+            log_msg = ""
+            log_msg += "Last song '" + last_track_name
+            log_msg += "' by '" + last_track_artists
+            log_msg += "' added by '" + last_adder.name + "'"
+            logger.debug(log_msg)
 
-        log_msg = ""
-        log_msg += "Last song '" + last_track_name
-        log_msg += "' by '" + last_track_artists
-        log_msg += "' added by '" + last_adder.name + "'"
-        logger.debug(log_msg)
+            next_adder = last_adder
 
-        next_adder = last_adder
+            all_users = db.get_all_users()
 
-        all_users = db.get_all_users()
+            while next_adder.id == last_adder.id:
+                next_adder = random.choice(all_users)
 
-        while next_adder.id == last_adder.id:
-            next_adder = random.choice(all_users)
+            logger.debug("Next random adder: '" + next_adder.name + "'")
 
-        logger.debug("Next random adder: '" + next_adder.name + "'")
+            mailer.add_new_element(
+                playlist,
+                last_adder,
+                last_track_name,
+                last_track_artists,
+                next_adder)
 
-        mailer.add_new_element(
-            playlist,
-            last_adder,
-            last_track_name,
-            last_track_artists,
-            next_adder)
+            db.update_playlist_songs(playlist, len(tracks))
 
-        db.update_playlist_songs(playlist, len(tracks))
+        except:
+            logger.warn("Exception happened:\n" + traceback.format_exc())
 
     logger.debug("There is no more playlists to check")
 
