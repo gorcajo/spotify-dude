@@ -59,4 +59,4 @@ The process of adding friends or playlist is not friendly neither :(
     ('A playlist name', 'playlist's spotify id', 0);
 ```
 
-3. Let cron do its magic :)
+3. Let cron do its magic.
