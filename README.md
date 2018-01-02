@@ -52,11 +52,13 @@ The process of adding friends or playlist is not friendly neither :(
 2. Insert some data in both `users` and `playlists` tables:
 ```
     insert into users(name, spotify_id, mail) values
-    ('Your name', 'your spotify user id', 'your email address'),
-    ('friend's name', 'friend's spotify user id', 'friend's email address');
+    ('your name', 'your spotify user id', 'your email address'),
+    ('friend name', 'friend spotify user id', 'friend email address'),
+    ('another friend name', 'another friend spotify user id', 'another friend email address');
 
     insert into playlists(name, spotify_id, songs_last_seen) values
-    ('A playlist name', 'playlist's spotify id', 0);
+    ('a playlist name', 'playlist spotify id', 0)
+    ('another playlist name', 'another playlist spotify id', 0);
 ```
 
 3. Let cron do its magic.
