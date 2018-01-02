@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tokens getter</title>
+
+    <meta charset='utf-8'></meta>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+
+<body>
+<div class='container-fluid'>
+
+    <div class='row'>
+        <div class='col-md-2'></div>
+
+        <div class='col-md-8'>
+            <h1>Spotify API access & refresh tokens getter</h1>
+
+            <br/>
+
+            <p><strong>1. Login and athorize the app and copy the redirected URL:</strong></p>
+            <button id='btn-request-code' type='button' class='btn btn-default'>Authorize</button>
+
+            <br/><br/>
+
+            <p><strong>2. Paste here the redirected URL:</strong></p>
+            <textarea id='txt-code' class='form-control' rows='4'></textarea>
+
+            <br/>
+
+            <p><strong>3. Get the command to execute it in a shell:</strong></p>
+            <button id='btn-get-cmd' type='button' class='btn btn-default'>Get command</button>
+
+            <br/><br/>
+
+            <pre id='pre-cmd'></pre>
+
+            <p><strong>4. Paste here the rsult of the command:</strong></p>
+            <textarea id='txt-response' class='form-control' rows='4'></textarea>
+
+            <br/>
+
+            <p><strong>5. Obtain the tokens:</strong></p>
+            <button id='btn-get-tokens' type='button' class='btn btn-default'>Get tokens</button>
+            <br/><br/>
+            <p>Access token:</p>
+            <pre id='pre-access'></pre>
+            <p>Refresh token:</p>
+            <pre id='pre-refresh'></pre>
+        </div>
+
+        <div class='col-md-2'></div>
+    </div>
+
+</div>
+
+<script>
+    CLIENT_ID = "c4216da75f184413837c5c3de0b87b0c"
+    CLIENT_SECRET = "1c62ee98883f4dcabbc1943e4520bc65"
+
+    $(document).ready(function() {
+        "use strict";
+
+        $("#btn-request-code").click(function() {
+            let url = "";
+            url += "https://accounts.spotify.com/authorize/"
+            url += "?client_id=c4216da75f184413837c5c3de0b87b0c"
+            url += "&response_type=code"
+            url += "&redirect_uri=" + encodeURI("https://example.com/callback")
+            url += "&scope=" + encodeURI("playlist-read-private playlist-read-collaborative")
+            url += "&show_dialog=true"
+
+            window.location = url
+        });
+
+        $("#btn-get-cmd").click(function() {
+            let url = "https://accounts.spotify.com/api/token"
+            let header = "Authorization: Basic " + btoa(CLIENT_ID + ":" + CLIENT_SECRET)
+    
+            let command = ""
+            command += "curl -X POST '" + url + "' \\\n"
+            command += "  --header '" + header + "' \\\n"
+            command += "  --data 'grant_type=authorization_code' \\\n"
+            command += "  --data 'code=" + $("#txt-code").val().substring(34) + "' \\\n"
+            command += "  --data 'redirect_uri=" + encodeURI("https://example.com/callback") + "' \\\n"
+            command += "&& echo"
+    
+            let headers = {
+                
+            }
+    
+            $("#pre-cmd").html(command)
+        });
+
+        $("#btn-get-tokens").click(function() {
+            let json = JSON.parse($("#txt-response").val())
+            $("#pre-access").html(json.access_token)
+            $("#pre-refresh").html(json.refresh_token)
+        });
+    });
+</script>
+
+</body>
+</html>

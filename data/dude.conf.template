@@ -1,0 +1,6 @@
+DB_FILE=/opt/spotify-dude/data/dude.db
+MAIL_SENDER=<your-email-address>
+MAIL_PASSWORD=<your-email-password>
+CLIENT_ID=<from-your-spotify-developer-console>
+CLIENT_SECRET=<from-your-spotify-developer-console>
+REFRESH_TOKEN=<follow-the-tokensgetter.html-instructions>
