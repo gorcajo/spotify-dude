@@ -2,7 +2,6 @@
 
 import sqlite3
 
-import logger
 import confmanager as conf
 
 DB_FILE = conf.get("DB_FILE")
@@ -52,7 +51,7 @@ def find_user_by_spotify_id(spotify_id):
         elif len(rows) == 1:
             return User(rows[0])
         else:
-            raise Exception
+            raise DbError("Found more than one user with spotify_id = '" + spotify_id + "'")
 
 def find_playlist_by_spotify_id(spotify_id):
     """Returns the playlist with the given Spotify ID"""
@@ -71,7 +70,7 @@ def find_playlist_by_spotify_id(spotify_id):
         elif len(rows) == 1:
             return Playlist(rows[0])
         else:
-            raise Exception
+            raise DbError("Found more than one playlist with spotify_id = '" + spotify_id + "'")
 
 def update_playlist_songs(playlist, new_song_count):
     """Updates the playlist's songs"""
@@ -88,7 +87,7 @@ def update_playlist_songs(playlist, new_song_count):
         qry += "  songs_last_seen = " + str(new_song_count) + "\n"
         qry += "WHERE id = " + str(playlist.id)
 
-        rows = conn.cursor().execute(qry)
+        conn.cursor().execute(qry)
 
 def get_all_users():
     """Returns a list with all users"""
@@ -123,3 +122,7 @@ def get_all_playlists():
             playlists.append(Playlist(row))
 
     return playlists
+
+class DbError(Exception):
+    """Exception to be raised during a bad query"""
+    pass
