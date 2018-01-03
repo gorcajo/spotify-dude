@@ -45,7 +45,7 @@ def roulette(must_send_mail=False):
 
     logger.debug("Initializing Spotify API client...")
     api = ApiClient()
-    logger.debug("... OK, Spotify access key gotten: [" + api.get_access_token() + "]")
+    logger.debug("... success, access key gotten: [" + api.get_access_token() + "]")
 
     logger.debug("Getting all the playlists from DB...")
     playlists = db.get_all_playlists()
@@ -68,7 +68,7 @@ def roulette(must_send_mail=False):
                 logger.debug("... no name change")
 
             if playlist.songs_last_seen == len(tracks):
-                logger.debug("There are no changes, playlist skipped")
+                logger.debug("There are no song changes, playlist skipped")
                 continue
             else:
                 logger.debug("There are changes, an update will be made...")
