@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 APP_DIR="/opt/spotify-dude"
 CONF_FILE="$APP_DIR/data/dude.conf"

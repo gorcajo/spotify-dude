@@ -5,6 +5,7 @@ A simple app to make colaborative Spotify playlists with friends funnier.
 ## I. Requirements
 
 - A Linux machine.
+- SQLite3 installed (`sudo apt install sqlite3` in Ubuntu)
 - A Spotify account (free or premium).
 
 ## II. Installation
