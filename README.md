@@ -62,3 +62,5 @@ The process of adding friends or playlist is not friendly neither :(
 ```
 
 3. Let cron do its magic.
+
+4. See the logs at `/opt/spotify-dude/logs/` (if you left that parameter as default in `dude.conf`).
