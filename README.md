@@ -42,7 +42,7 @@ vim /opt/spotify-dude/data/dude.conf
 8. Add a new cron entry with `crontab -e` like:
 ```
 # Spotify Dude every 5 minutes:
-*/5 * * * * python3.6 /opt/spotify-dude/dude.py --run
+*/5 * * * * python3.6 /opt/spotify-dude/dude.py --roulette
 ```
 
 ## III. Usage
