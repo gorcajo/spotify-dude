@@ -71,7 +71,7 @@ def roulette(must_send_mail=False):
                 logger.debug("There are no song changes, playlist skipped")
                 continue
             else:
-                logger.debug("There are changes, an update will be made...")
+                logger.debug("There are song changes, an update will be made...")
                 there_were_changes = True
 
             last_adder = ""
