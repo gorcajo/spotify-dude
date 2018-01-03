@@ -18,7 +18,7 @@ git clone https://github.com/gorcajo/spotify-dude.git /opt/spotify-dude
 
 2. Install the SQLite DB:
 ```
-/opt/spotify-dude/tools/helper.sh --installdb
+/opt/spotify-dude/tools/db-tool.sh --installdb
 ```
 
 3. Create a new app in your Spotify Developer Console: https://beta.developer.spotify.com/dashboard
