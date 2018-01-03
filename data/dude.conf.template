@@ -1,4 +1,5 @@
 DB_FILE=/opt/spotify-dude/data/dude.db
+LOGS_DIR=/opt/spotify-dude/logs
 MAIL_SENDER=<your-email-address>
 MAIL_PASSWORD=<your-email-password>
 CLIENT_ID=<from-your-spotify-developer-console>

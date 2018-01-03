@@ -1,6 +1,13 @@
 """Simple logger"""
 
 import datetime
+import pathlib
+
+import confmanager as conf
+
+LOGS_DIR = conf.get("LOGS_DIR")
+
+pathlib.Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
 
 def debug(msg):
     """Logs a message with timestamp and DEBUG level"""
@@ -20,5 +27,12 @@ def error(msg):
 
 def _log(level, msg):
     """Logs a message with timestamp"""
-    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print(level + " | " + timestamp + " | " + str(msg))
+    log_name = datetime.datetime.now().strftime("%Y-%m-%d.log")
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    full_msg = level + " | " + timestamp + " | " + str(msg)
+
+    print(full_msg)
+
+    with open(LOGS_DIR + "/" + log_name, "a") as file:
+        file.write(full_msg + "\n")
