@@ -72,6 +72,23 @@ def find_playlist_by_spotify_id(spotify_id):
         else:
             raise DbError("Found more than one playlist with spotify_id = '" + spotify_id + "'")
 
+def update_playlist_name(playlist, new_name):
+    """Updates the playlist's songs"""
+
+    conn = sqlite3.connect(DB_FILE)
+
+    with conn:
+        conn.row_factory = sqlite3.Row
+
+        qry = ""
+        qry += "UPDATE\n"
+        qry += "  playlists\n"
+        qry += "SET\n"
+        qry += "  name = '" + str(new_name) + "'\n"
+        qry += "WHERE id = " + str(playlist.id)
+
+        conn.cursor().execute(qry)
+
 def update_playlist_songs(playlist, new_song_count):
     """Updates the playlist's songs"""
 

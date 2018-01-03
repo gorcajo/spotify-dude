@@ -7,7 +7,7 @@ import random
 import traceback
 
 import logger
-import apiclient as api
+from apiclient import ApiClient
 import dbmanager as db
 from mailer import Mailer
 
@@ -43,9 +43,9 @@ def roulette(must_send_mail=False):
     mailer = Mailer(subject="Spotify update!")
     there_were_changes = False
 
-    logger.debug("Getting the Spotify's access key...")
-    token = api.get_access_token()
-    logger.debug("... access key gotten: '" + token[:8] + "..." + token[-8:] + "'")
+    logger.debug("Initializing Spotify API client...")
+    api = ApiClient()
+    logger.debug("... OK, Spotify access key gotten: [" + api.get_access_token() + "]")
 
     logger.debug("Getting all the playlists from DB...")
     playlists = db.get_all_playlists()
@@ -53,9 +53,19 @@ def roulette(must_send_mail=False):
 
     for playlist in playlists:
         try:
-            logger.debug("Getting all tracks in '" + playlist.name + "' from Spotify API...")
-            tracks = api.get_all_tracks_from_playlist(token, playlist.spotify_id)
+            logger.debug("Getting all tracks in [" + playlist.name + "] from Spotify API...")
+            tracks = api.get_all_tracks_from_playlist(playlist.spotify_id)
             logger.debug("... gotten " + str(len(tracks)) + " tracks")
+
+            logger.debug("Checking the playlist name...")
+            current_name = api.get_playlist_name_from_id(playlist.spotify_id)
+
+            if playlist.name != current_name:
+                playlist.name = current_name
+                db.update_playlist_name(playlist, current_name)
+                logger.debug("... the name of the playlist has changed to [" + current_name + "]")
+            else:
+                logger.debug("... no name change")
 
             if playlist.songs_last_seen == len(tracks):
                 logger.debug("There are no changes, playlist skipped")
@@ -82,9 +92,9 @@ def roulette(must_send_mail=False):
                 last_track_artists = artists
 
             log_msg = ""
-            log_msg += "Last song '" + last_track_name
-            log_msg += "' by '" + last_track_artists
-            log_msg += "' added by '" + last_adder.name + "'"
+            log_msg += "Last song [" + last_track_name + "] "
+            log_msg += "by [" + last_track_artists + "] "
+            log_msg += "added by [" + last_adder.name + "]"
             logger.debug(log_msg)
 
             next_adder = last_adder

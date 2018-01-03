@@ -1,95 +1,116 @@
-"""Manages the calls to Spotify API"""
+"""Calls to RESTful APIs"""
 
 import base64
 import requests
 
 import confmanager as conf
 
-CLIENT_ID = conf.get("CLIENT_ID")
-CLIENT_SECRET = conf.get("CLIENT_SECRET")
-REFRESH_TOKEN = conf.get("REFRESH_TOKEN")
+class HttpMethod(object):
+    """Just like a Java enum"""
+    get = 0
+    post = 1
+    put = 2
+    patch = 3
+    delete = 4
 
-def get_all_tracks_from_playlist(token, playlist_id):
-    """Returns a list of Spotify's track objects corresponding to the playlist ID given"""
+class ApiClient(object):
+    """
+        Manages the calls to the Spotify API
+    """
 
-    url = "https://api.spotify.com/v1/users/reth5/playlists/" + playlist_id + "/tracks"
-    headers = {"Authorization": "Bearer " + token}
-    data = {}
-    response = requests.get(url, headers=headers, data=data)
+    BASE_URL = "https://api.spotify.com/v1"
 
-    if response.status_code != 200:
-        raise RestError(str(response.status_code) + ": " + str(response.json()["error"]["message"]))
-    else:
-        return response.json()["items"]
+    def __init__(self):
+        self.user_id = conf.get("USER_ID")
+        self._access_token = None
 
-def get_playlist_ids_from_name_list(token, names):
-    """Returns a list of IDs corresponding to the playlist name list given"""
+        basic_auth = conf.get("CLIENT_ID") + ":" + conf.get("CLIENT_SECRET")
+        basic_auth = base64.b64encode(basic_auth.encode("utf-8")).decode("utf-8")
 
-    playlist_ids = []
+        response = call_api(
+            method=HttpMethod.post,
+            url="https://accounts.spotify.com/api/token",
+            headers={"Authorization": "Basic " + basic_auth},
+            data={
+                "grant_type": "refresh_token",
+                "refresh_token": conf.get("REFRESH_TOKEN")
+            }
+        )
 
-    page = 0
-    while True:
-        playlists = get_all_playlists(token, page)
+        self._access_token = response["access_token"]
 
-        if len(playlists) <= 0:
-            break
+    def get_access_token(self):
+        """Returns a reduced version of the access token, suitable for logging"""
+        reduced_token = self._access_token[:8] + "..." + self._access_token[-8:]
+        return reduced_token
 
-        for playlist in playlists:
-            name = playlist["name"]
+    def get_playlist_name_from_id(self, playlist_id):
+        """Returns the name of the playlist given its ID"""
 
-            for list_name in names:
-                if name == list_name:
-                    playlist_ids.append(playlist["id"])
-                    break
+        url = ApiClient.BASE_URL
+        url += "/users/" + self.user_id
+        url += "/playlists/" + playlist_id
 
-        page += 1
+        response = call_api(
+            method=HttpMethod.get,
+            url=url,
+            headers={"Authorization": "Bearer " + self._access_token}
+        )
 
-    return playlist_ids
+        return response["name"]
 
-def get_all_playlists(token, page):
-    """Returns a list of Spotify's playlist objects belonging to me"""
+    def get_all_tracks_from_playlist(self, playlist_id):
+        """Returns a list of Spotify's track objects corresponding to the playlist ID given"""
 
-    offset = 50 * page
-    url = "https://api.spotify.com/v1/users/reth5/playlists?limit=50&offset=" + str(offset)
-    headers = {"Authorization": "Bearer " + token}
-    data = {}
-    response = requests.get(url, headers=headers, data=data)
+        url = ApiClient.BASE_URL
+        url += "/users/" + self.user_id
+        url += "/playlists/" + playlist_id
+        url += "/tracks"
 
-    if response.status_code != 200:
-        raise RestError(str(response.status_code) + ": " + str(response.json()["error"]["message"]))
-    else:
-        return response.json()["items"]
+        response = call_api(
+            method=HttpMethod.get,
+            url=url,
+            headers={"Authorization": "Bearer " + self._access_token}
+        )
 
-def get_access_token():
-    """Returns the access token"""
+        return response["items"]
 
-    url = "https://accounts.spotify.com/api/token"
+    def get_all_playlists(self, page):
+        """Returns a list of Spotify's playlist objects belonging to me"""
 
-    headers = {"Authorization": "Basic " + encode_base64(CLIENT_ID + ":" + CLIENT_SECRET)}
+        url = ApiClient.BASE_URL
+        url += "/users/" + self.user_id
+        url += "/playlists?limit=50&offset=" + str(50 * page)
 
-    data = {
-        "grant_type": "refresh_token",
-        "refresh_token": REFRESH_TOKEN
-    }
+        response = call_api(
+            method=HttpMethod.get,
+            url=url,
+            headers={"Authorization": "Bearer " + self._access_token}
+        )
 
-    response = requests.post(url, headers=headers, data=data)
+        return response["items"]
+
+def call_api(method, url, headers, data=None):
+    """Generic API caller"""
+
+    if data is None:
+        data = {}
+
+    if method == HttpMethod.get:
+        response = requests.get(url, headers=headers, data=data)
+    elif method == HttpMethod.post:
+        response = requests.post(url, headers=headers, data=data)
+    elif method == HttpMethod.put:
+        response = requests.put(url, headers=headers, data=data)
+    elif method == HttpMethod.patch:
+        response = requests.patch(url, headers=headers, data=data)
+    elif method == HttpMethod.delete:
+        response = requests.delete(url, headers=headers, data=data)
 
     if response.status_code != 200:
         raise RestError(str(response.status_code) + ": " + str(response.json()))
     else:
-        return response.json()["access_token"]
-
-def encode_base64(string):
-    """Returns a string containing the base64 encoded string"""
-
-    string = string.encode("utf-8")
-    return base64.b64encode(string).decode("utf-8")
-
-def decode_base64(string):
-    """Returns the decoded version from a base64 encoded string"""
-
-    string = string.encode("utf-8")
-    return base64.b64decode(string).decode("utf-8")
+        return response.json()
 
 class RestError(Exception):
     """Exception to be raised when an unexpected status code from a RESTful API is gotten"""
