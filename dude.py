@@ -53,11 +53,11 @@ class Dude(object):
                 if stored_playlist.songs_last_seen == len(songs):
                     self.logger.debug("There are no song changes, playlist skipped")
                 elif stored_playlist.songs_last_seen < len(songs):
-                    self.logger.debug("Somebody added a song, an update will be made")
+                    self.logger.debug(f"Somebody added songs (stored: {stored_playlist.songs_last_seen}, now: {len(songs)}), an update will be made")
                     self._update_with_added_song(stored_playlist, songs[-1], len(songs))
                     there_were_changes = True
                 else:
-                    self.logger.debug("Somebody deleted a song, an update will be made")
+                    self.logger.debug(f"Somebody deleted songs (stored: {stored_playlist.songs_last_seen}, now: {len(songs)}), an update will be made")
                     self._update_with_deleted_song(stored_playlist, len(songs))
                     there_were_changes = True
 
