@@ -34,7 +34,7 @@ class Mailer(object):
         element += f"<strong>{last_adder.name}</strong>"
         element += f":</p>"
         element += f'<p>   "{track_name}" de {track_artists}</p>'
-        element += f"<p>Le toca añadir... <strong>{next_adder.name}</strong>!</p>"
+        element += f"<p>Le toca añadir a... <strong>{next_adder.name}</strong>!</p>"
         self.email_contents += [element]
 
 
@@ -43,8 +43,8 @@ class Mailer(object):
         the last adder, the track's name and the track's artists"""
 
         element = f"<h2>{playlist.name}</h2>"
-        element += f"<p>Alguien ha borrado una canción</p>"
-        element += f"<p>Le toca añadir... <strong>{next_adder.name}</strong>!</p>"
+        element += f"<p>Alguien ha borrado una canción!</p>"
+        element += f"<p>Le toca añadir a... <strong>{next_adder.name}</strong>!</p>"
         self.email_contents += [element]
 
 
