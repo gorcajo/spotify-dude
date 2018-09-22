@@ -108,17 +108,7 @@ class Dude(object):
 
         self.logger.debug(f"Next random adder: [{next_adder.name}]")
 
-        cover_b64 = None
-
-        if song.cover_url:
-            self.logger.debug(f"Retrieving song cover from [{song.cover_url}]...")
-            response = requests.get(song.cover_url)
-            cover_b64 = base64.b64encode(response.content).decode("utf-8")
-            self.logger.debug(f"...gotten {len(response.content)} bytes")
-        else:
-            self.logger.debug(f"Song has no cover URL")
-
-        self.mailer.add_new_event_as_new_song(stored_playlist, adder, song, next_adder, cover_b64)
+        self.mailer.add_new_event_as_new_song(stored_playlist, adder, song, next_adder)
 
         if not self.debug_mode:
             self.db.update_playlist_songs(stored_playlist, current_song_count)

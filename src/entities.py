@@ -54,13 +54,15 @@ class Song(object):
         self.adder_by = adder_by
         self.added_at = datetime.strptime(spotify_song["added_at"], "%Y-%m-%dT%H:%M:%SZ")
         
-        biggest_cover_width = 0
         self.cover_url = None
 
-        for cover in spotify_song["track"]["album"]["images"]:
-            if cover["width"] > biggest_cover_width:
-                self.cover_url = cover["url"]
-                biggest_cover_width = cover["width"]
+        if len(spotify_song["track"]["album"]["images"]) > 0:
+            biggest_cover_width = 0
+            
+            for cover in spotify_song["track"]["album"]["images"]:
+                if cover["width"] > biggest_cover_width:
+                    self.cover_url = cover["url"]
+                    biggest_cover_width = cover["width"]
 
 
     def __str__(self):

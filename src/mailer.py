@@ -26,7 +26,7 @@ class Mailer(object):
         self.email_contents = []
 
 
-    def add_new_event_as_new_song(self, playlist: Playlist, last_adder: User, song: Song, next_adder: User, cover_b64: str = None):
+    def add_new_event_as_new_song(self, playlist: Playlist, last_adder: User, song: Song, next_adder: User):
         """Adds a new element, consisting in the playlist name just modified,
         the last adder, the track's name and the track's artists"""
 
@@ -34,8 +34,8 @@ class Mailer(object):
         element += f"<p>El último en añadir una canción fue <strong>{last_adder.name}</strong>:</p>\n"
         element += f'<p>"{song.name}" de {song.artists}</p>\n'
 
-        if cover_b64 is not None:
-            element += f"<img src='data:image/png;base64, {cover_b64}' alt='portada'/>\n"
+        if song.cover_url is not None:
+            element += f"<img src='{song.cover_url}' alt='portada'/>\n"
 
         element += f"<p>Le toca añadir a... <strong>{next_adder.name}</strong>!</p>\n"
         self.email_contents += [element]
