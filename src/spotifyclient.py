@@ -5,6 +5,7 @@ import requests
 
 import confmanager as conf
 from entities import Playlist
+from entities import Song
 from logger import Logger
 
 
@@ -52,7 +53,7 @@ class SpotifyClient(object):
         self.logger.debug(f"... success, access key gotten: [{self._access_token[:8]}...{self._access_token[-8:]}]")
 
 
-    def get_playlist_name_from_id(self, playlist: Playlist):
+    def get_name_from_playlist(self, playlist: Playlist) -> str:
         """Returns the name of the playlist given its ID"""
 
         self.logger.debug(f"Getting the name of the playlist with SpotifyID [{playlist.spotify_id}] from Spotify API...")
@@ -62,7 +63,7 @@ class SpotifyClient(object):
         return response["name"]
 
 
-    def get_all_songs_from_playlist(self, playlist: Playlist):
+    def get_all_songs_from_playlist(self, playlist: Playlist) -> dict:
         """Returns a list of Spotify's track objects corresponding to the playlist ID given"""
 
         self.logger.debug(f"Getting all songs in [{playlist.name}] from Spotify API...")

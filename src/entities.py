@@ -40,9 +40,10 @@ class Playlist(object):
 
 class Song(object):
 
-    def __init__(self, spotify_song: dict, adder_by: User):
+    def __init__(self, spotify_song: dict, added_by: User):
         self.spotify_id = spotify_song["track"]["id"]
         self.name = spotify_song["track"]["name"]
+        self.album_spotify_id = spotify_song["track"]["album"]["id"]
 
         self.artists = ""
 
@@ -51,7 +52,6 @@ class Song(object):
 
         self.artists = self.artists[:-2]
 
-        self.adder_by = adder_by
         self.added_at = datetime.strptime(spotify_song["added_at"], "%Y-%m-%dT%H:%M:%SZ")
         
         self.cover_url = None
@@ -63,10 +63,12 @@ class Song(object):
                 if cover["width"] > biggest_cover_width:
                     self.cover_url = cover["url"]
                     biggest_cover_width = cover["width"]
+                    
+        self.added_by = added_by
 
 
     def __str__(self):
-        return str(f"'{self.name}' by '{self.artists}' added by '{self.adder_by.name}'")
+        return str(f"'{self.name}' by '{self.artists}' added by '{self.added_by.name}'")
 
 
     def __repr__(self):

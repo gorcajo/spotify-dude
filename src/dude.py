@@ -13,6 +13,7 @@ from logger import Logger
 from spotifyclient import SpotifyClient
 from dbmanager import DbManager
 from mailer import Mailer
+import statsplotter
 
 
 class Dude(object):
@@ -84,7 +85,19 @@ class Dude(object):
                     adder = all_users[spotify_song["added_by"]["id"]]
                     songs += [Song(spotify_song, adder)]
                 
-                print(f"we have {len(songs)} songs")
+                songs_added_per_user = {}
+
+                for song in songs:
+                    if song.added_by.name not in songs_added_per_user:
+                        songs_added_per_user[song.added_by.name] = 1
+                    else:
+                        songs_added_per_user[song.added_by.name] += 1
+                
+                self.logger.debug("Generating 'songs per user' graph...")
+                graph_base64 = statsplotter.dict_as_bar_graph(songs_added_per_user, "Canciones/persona", "Canciones")
+                # TODO
+                print(graph_base64)
+                self.logger.debug("... done")
 
             except:
                 self.logger.warn(f"Exception happened:\n{traceback.format_exc()}")
