@@ -70,14 +70,14 @@ class Dude(object):
 
     def statistics(self):
         """Sends an email with the statistics of all playlists"""
-        stored_playlists = self.db.get_all_playlists()
+        playlists = self.db.get_all_playlists()
 
         all_users = {}
 
         for user_in_db in self.db.get_all_users():
             all_users[user_in_db.spotify_id] = user_in_db
 
-        for playlist in stored_playlists:
+        for playlist in playlists:
             try:
                 songs = []
 
