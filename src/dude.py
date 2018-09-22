@@ -2,10 +2,13 @@
     The Spotify Dude app!
 """
 
+import base64
 import random
+import requests
 import traceback
 
 from entities import Playlist
+from entities import Song
 from logger import Logger
 from spotifyclient import SpotifyClient
 from dbmanager import DbManager
@@ -14,7 +17,7 @@ from mailer import Mailer
 
 class Dude(object):
     
-    def __init__(self, logger: Logger, db_manager: DbManager, spotify_client: SpotifyClient, mailer: Mailer, debug_mode=True):
+    def __init__(self, logger: Logger, db_manager: DbManager, spotify_client: SpotifyClient, mailer: Mailer, debug_mode: bool = True):
         self.logger = logger
         self.db = db_manager
         self.spotify = spotify_client
@@ -32,7 +35,6 @@ class Dude(object):
         for stored_playlist in stored_playlists:
             try:
                 songs = self.spotify.get_all_songs_from_playlist(stored_playlist)
-
                 current_name = self.spotify.get_playlist_name_from_id(stored_playlist)
 
                 if stored_playlist.name != current_name:
@@ -58,28 +60,43 @@ class Dude(object):
 
         self.logger.debug("There are no more playlists to check")
 
-        if not self.debug_mode and there_were_changes:
-            self.mailer.send_mail()
+        if there_were_changes:
+            if not self.debug_mode:
+                self.mailer.send_mail()
+            else:
+                self.mailer.dump_html_to_file("/tmp/mail.html")
 
 
     def statistics(self):
         """Sends an email with the statistics of all playlists"""
-        pass
+        stored_playlists = self.db.get_all_playlists()
+
+        all_users = {}
+
+        for user_in_db in self.db.get_all_users():
+            all_users[user_in_db.spotify_id] = user_in_db
+
+        for stored_playlist in stored_playlists:
+            try:
+                songs = []
+
+                for spotify_song in self.spotify.get_all_songs_from_playlist(stored_playlist):
+                    adder = all_users[spotify_song["added_by"]["id"]]
+                    songs += [Song(spotify_song, adder)]
+                
+                print(f"we have {len(songs)} songs")
+
+            except:
+                self.logger.warn(f"Exception happened:\n{traceback.format_exc()}")
     
 
-    def _update_with_added_song(self, stored_playlist: Playlist, last_spotify_song: dict, current_song_count: int):
+    def _update_with_added_song(self, stored_playlist: Playlist, last_song: dict, current_song_count: int):
         self.logger.debug(f"Retrieving the last song added along with its data")
 
-        adder = self.db.find_user_by_spotify_id(last_spotify_song["added_by"]["id"])
+        adder = self.db.find_user_by_spotify_id(last_song["added_by"]["id"])
+        song = Song(last_song, adder)
 
-        artists = ""
-        for artist in last_spotify_song["track"]["artists"]:
-            artists += artist["name"] + ", "
-        artists = artists[:-2]
-
-        song_name = last_spotify_song["track"]["name"]
-
-        self.logger.debug(f"Last song [{song_name}] by [{artists}] added by [{adder.name}]")
+        self.logger.debug(f"Last song was [{song}]")
 
         next_adder = adder
 
@@ -91,12 +108,17 @@ class Dude(object):
 
         self.logger.debug(f"Next random adder: [{next_adder.name}]")
 
-        self.mailer.add_new_element_as_new_song(
-            stored_playlist,
-            adder,
-            song_name,
-            artists,
-            next_adder)
+        cover_b64 = None
+
+        if song.cover_url:
+            self.logger.debug(f"Retrieving song cover from [{song.cover_url}]...")
+            response = requests.get(song.cover_url)
+            cover_b64 = base64.b64encode(response.content).decode("utf-8")
+            self.logger.debug(f"...gotten {len(response.content)} bytes")
+        else:
+            self.logger.debug(f"Song has no cover URL")
+
+        self.mailer.add_new_event_as_new_song(stored_playlist, adder, song, next_adder, cover_b64)
 
         if not self.debug_mode:
             self.db.update_playlist_songs(stored_playlist, current_song_count)
@@ -108,7 +130,7 @@ class Dude(object):
         next_adder = random.choice(all_users)
         self.logger.debug(f"Next random adder: [{next_adder.name}]")
 
-        self.mailer.add_new_element_as_deleted_song(stored_playlist, next_adder)
+        self.mailer.add_new_event_as_deleted_song(stored_playlist, next_adder)
 
         if not self.debug_mode:
             self.logger.debug(f"Updating playlist [{stored_playlist.name}] in DB...")
