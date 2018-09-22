@@ -31,6 +31,8 @@ class DbManager(object):
             self._log_query(qry)
             rows = conn.cursor().execute(qry).fetchall()
 
+            self.logger.debug(f"... gotten {len(rows)} rows")
+
             if not rows:
                 return None
             elif len(rows) == 1:
@@ -48,6 +50,8 @@ class DbManager(object):
             qry = f"SELECT * FROM playlists WHERE spotify_id = '{spotify_id}'"
             self._log_query(qry)
             rows = conn.cursor().execute(qry).fetchall()
+
+            self.logger.debug(f"... gotten {len(rows)} rows")
 
             if not rows:
                 return None
@@ -75,6 +79,8 @@ class DbManager(object):
             self._log_query(qry)
 
             conn.cursor().execute(qry)
+            
+            self.logger.debug(f"... done")
 
 
     def update_playlist_songs(self, playlist: Playlist, new_song_count: int):
@@ -95,6 +101,8 @@ class DbManager(object):
             self._log_query(qry)
 
             conn.cursor().execute(qry)
+            
+            self.logger.debug(f"... done")
 
 
     def get_all_users(self) -> List[User]:
@@ -108,6 +116,8 @@ class DbManager(object):
             qry = "SELECT * FROM users"
             self._log_query(qry)
             rows = conn.cursor().execute(qry).fetchall()
+
+            self.logger.debug(f"... gotten {len(rows)} rows")
 
             for row in rows:
                 users.append(User(row))
@@ -126,6 +136,8 @@ class DbManager(object):
             qry = "SELECT * FROM playlists"
             self._log_query(qry)
             rows = conn.cursor().execute(qry).fetchall()
+            
+            self.logger.debug(f"... gotten {len(rows)} rows")
 
             for row in rows:
                 playlists.append(Playlist(row))
@@ -139,4 +151,4 @@ class DbManager(object):
         for line in query.splitlines():
             log_lines += [line.strip()]
 
-        self.logger.debug(f"  {' '.join(log_lines)}")
+        self.logger.debug(' '.join(log_lines))

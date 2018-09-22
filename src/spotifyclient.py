@@ -4,6 +4,8 @@ import base64
 import requests
 
 import confmanager as conf
+from entities import Playlist
+from logger import Logger
 
 
 class HttpMethod(object):
@@ -22,7 +24,11 @@ class SpotifyClient(object):
     BASE_URL = "https://api.spotify.com/v1"
 
 
-    def __init__(self):
+    def __init__(self, logger: Logger):
+        self.logger = logger
+
+        self.logger.debug("Initializing Spotify API client...")
+
         self.user_id = conf.get("USER_ID")
         self._access_token = None
 
@@ -42,28 +48,28 @@ class SpotifyClient(object):
             self._access_token = response.json()["access_token"]
         else:
             raise RestError(f"{response.status_code}: {response.json()}")
+        
+        self.logger.debug(f"... success, access key gotten: [{self._access_token[:8]}...{self._access_token[-8:]}]")
 
 
-    def get_access_token(self):
-        """Returns a reduced version of the access token, suitable for logging"""
-
-        reduced_token = f"{self._access_token[:8]}...{self._access_token[-8:]}"
-        return reduced_token
-
-
-    def get_playlist_name_from_id(self, playlist_id: str):
+    def get_playlist_name_from_id(self, playlist: Playlist):
         """Returns the name of the playlist given its ID"""
 
-        response = self._get(f"{SpotifyClient.BASE_URL}/users/{self.user_id}/playlists/{playlist_id}")
+        self.logger.debug(f"Getting the name of the playlist with SpotifyID [{playlist.spotify_id}] from Spotify API...")
+        response = self._get(f"{SpotifyClient.BASE_URL}/users/{self.user_id}/playlists/{playlist.spotify_id}")
+        self.logger.debug(f"... got [{response['name']}]")
+
         return response["name"]
 
 
-    def get_all_songs_from_playlist(self, playlist_id: str):
+    def get_all_songs_from_playlist(self, playlist: Playlist):
         """Returns a list of Spotify's track objects corresponding to the playlist ID given"""
+
+        self.logger.debug(f"Getting all songs in [{playlist.name}] from Spotify API...")
 
         tracks = []
 
-        url = f"{SpotifyClient.BASE_URL}/users/{self.user_id}/playlists/{playlist_id}/tracks"
+        url = f"{SpotifyClient.BASE_URL}/users/{self.user_id}/playlists/{playlist.spotify_id}/tracks"
 
         while url:
             response = self._get(url)
@@ -75,14 +81,9 @@ class SpotifyClient(object):
 
             tracks += response["items"]
 
+        self.logger.debug(f"... gotten {len(tracks)} songs")
+
         return tracks
-
-
-    def get_all_playlists(self, page: int):
-        """Returns a list of Spotify's playlist objects belonging to me"""
-
-        response = self._get(f"{SpotifyClient.BASE_URL}/users/{self.user_id}/playlists?limit=50&offset={50 * page}")
-        return response["items"]
 
 
     def _get(self, url:str, data: dict = None) -> dict:

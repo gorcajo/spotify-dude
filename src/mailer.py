@@ -51,9 +51,11 @@ class Mailer(object):
     def send_mail(self):
         """Sends an email"""
 
-        self.logger.debug(f"Getting all mail receivers from DB...")
+        self.logger.debug("Getting all mail receivers from DB...")
         receivers = self.db.get_all_users()
         self.logger.debug(f"... gotten {len(receivers)} receivers")
+
+        self.logger.debug("Generating email body...")
 
         receivers_line = ""
         mail_addresses = []
@@ -76,9 +78,11 @@ class Mailer(object):
         
         body += "</body></html>"
 
-        self.logger.debug(f"Generated email body:\n{body}")
+        self.logger.debug(f"... done:\n{body}")
 
         server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
         server.login(MAIL_SENDER, MAIL_PASSWORD)
         server.sendmail(MAIL_SENDER, mail_addresses, body.encode("utf-8"))
         server.quit()
+
+        self.logger.debug("... email sent")
