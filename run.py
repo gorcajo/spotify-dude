@@ -13,14 +13,14 @@ def main():
 
     parser = argparse.ArgumentParser()
 
-    group1 = parser.add_mutually_exclusive_group(required=True)
-    group1.add_argument("-r", "--roulette",   action="store_true", help="runs a roulette if there was a song recently added")
+    group_operation = parser.add_mutually_exclusive_group(required=True)
+    group_operation.add_argument("-r", "--roulette",   action="store_true", help="runs a roulette if there was a song recently added")
 
     parser.add_argument("-d", "--debug", action="store_true", help="enables debug mode")
 
-    group2 = parser.add_mutually_exclusive_group(required=False)
-    group2.add_argument("-v", "--verbose", action="store_true", help="enables verbose output to stdout")
-    group2.add_argument("-s", "--silent", action="store_true", help="silences completely any output to stdout")
+    group_verbosity = parser.add_mutually_exclusive_group(required=False)
+    group_verbosity.add_argument("-v", "--verbose", action="store_true", help="enables verbose output to stdout")
+    group_verbosity.add_argument("-s", "--silent", action="store_true", help="silences completely any output to stdout")
 
     args = parser.parse_args()
 
