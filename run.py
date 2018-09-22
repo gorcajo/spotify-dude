@@ -6,6 +6,7 @@ import traceback
 from dude import Dude
 from logger import Logger
 from dbmanager import DbManager
+from mailer import Mailer
 
 
 def main():
@@ -28,13 +29,12 @@ def main():
     logger.info("Started")
 
     try:
-        dude = Dude(logger, DbManager())
+        db = DbManager(logger)
+        mailer = Mailer(logger, db, subject="Spotify update!")
+        dude = Dude(logger, db, mailer)
 
         if args.roulette:
-            if not args.debug:
-                dude.roulette(must_send_mail=True)
-            else:
-                dude.roulette(must_send_mail=False)
+            dude.roulette(debug_mode=args.debug)
     
     except:
         logger.error(f"Exception happened:\n{traceback.format_exc()}")

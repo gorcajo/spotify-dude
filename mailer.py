@@ -6,6 +6,7 @@ import confmanager as conf
 from dbmanager import DbManager
 from entities import Playlist
 from entities import User
+from logger import Logger
 
 
 MAIL_SENDER = conf.get("MAIL_SENDER")
@@ -17,7 +18,9 @@ class Mailer(object):
         Mailer class for manage mailing
     """
 
-    def __init__(self, subject: str):
+    def __init__(self, logger: Logger, db_manager: DbManager, subject: str):
+        self.logger = logger
+        self.db = db_manager
         self.subject = subject
         self.email_content = ""
 
@@ -37,8 +40,10 @@ class Mailer(object):
     def send_mail(self):
         """Sends an email"""
 
-        db = DbManager()
-        receivers = db.get_all_users()
+        self.logger.debug(f"Getting all mail receivers from DB...")
+        receivers = self.db.get_all_users()
+        self.logger.debug(f"... gotten {len(receivers)} receivers")
+
         receivers_line = ""
         mail_addresses = []
 
@@ -55,6 +60,8 @@ class Mailer(object):
         body += "\r\n"
         body += f"<html><head></head><body><h1>{self.subject}</h1>"
         body += f"{self.email_content}</body></html>"
+
+        self.logger.debug(f"Generated email body:\n{body}")
 
         server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
         server.login(MAIL_SENDER, MAIL_PASSWORD)

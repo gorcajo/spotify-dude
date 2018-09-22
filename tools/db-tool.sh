@@ -45,18 +45,18 @@ function installDb() {
     if [ -d $APP_DIR ]; then
         sqlite3 $DB_FILE "
             CREATE TABLE IF NOT EXISTS users(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            spotify_id TEXT,
-            mail TEXT
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                spotify_id TEXT,
+                mail TEXT
             )"
 
         sqlite3 $DB_FILE "
             CREATE TABLE IF NOT EXISTS playlists(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            spotify_id TEXT,
-            songs_last_seen INTEGER
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                spotify_id TEXT,
+                songs_last_seen INTEGER
             )"
 
         echo "DB successfully installed."

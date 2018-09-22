@@ -6,6 +6,7 @@ from typing import List
 import confmanager as conf
 from entities import Playlist
 from entities import User
+from logger import Logger
 
 
 class DbError(Exception):
@@ -15,7 +16,8 @@ class DbError(Exception):
 
 class DbManager(object):
 
-    def __init__(self):
+    def __init__(self, logger: Logger):
+        self.logger = logger
         self.db_file = conf.get("DB_FILE")
 
 
@@ -25,7 +27,9 @@ class DbManager(object):
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
 
-            rows = conn.cursor().execute(f"SELECT * FROM users WHERE spotify_id = '{spotify_id}'").fetchall()
+            qry = f"SELECT * FROM users WHERE spotify_id = '{spotify_id}'"
+            self._log_query(qry)
+            rows = conn.cursor().execute(qry).fetchall()
 
             if not rows:
                 return None
@@ -41,7 +45,9 @@ class DbManager(object):
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
 
-            rows = conn.cursor().execute(f"SELECT * FROM playlists WHERE spotify_id = '{spotify_id}'").fetchall()
+            qry = f"SELECT * FROM playlists WHERE spotify_id = '{spotify_id}'"
+            self._log_query(qry)
+            rows = conn.cursor().execute(qry).fetchall()
 
             if not rows:
                 return None
@@ -66,6 +72,8 @@ class DbManager(object):
                 f"  id = {playlist.id}",
             ])
 
+            self._log_query(qry)
+
             conn.cursor().execute(qry)
 
 
@@ -84,6 +92,8 @@ class DbManager(object):
                 f"  id = {playlist.id}",
             ])
 
+            self._log_query(qry)
+
             conn.cursor().execute(qry)
 
 
@@ -95,7 +105,9 @@ class DbManager(object):
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
 
-            rows = conn.cursor().execute("SELECT * FROM users").fetchall()
+            qry = "SELECT * FROM users"
+            self._log_query(qry)
+            rows = conn.cursor().execute(qry).fetchall()
 
             for row in rows:
                 users.append(User(row))
@@ -111,9 +123,15 @@ class DbManager(object):
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
 
-            rows = conn.cursor().execute("SELECT * FROM playlists").fetchall()
+            qry = "SELECT * FROM playlists"
+            self._log_query(qry)
+            rows = conn.cursor().execute(qry).fetchall()
 
             for row in rows:
                 playlists.append(Playlist(row))
 
         return playlists
+    
+
+    def _log_query(self, query: str):
+        self.logger.debug(f"  {query}")
