@@ -5,34 +5,51 @@ import pathlib
 
 import confmanager as conf
 
-LOGS_DIR = conf.get("LOGS_DIR")
 
-pathlib.Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
+class Logger(object):
 
-def debug(msg):
-    """Logs a message with timestamp and DEBUG level"""
-    _log("DEBUG", msg)
+    def __init__(self, verbose_mode: bool = True):
+        self.verbose_mode = verbose_mode
 
-def info(msg):
-    """Logs a message with timestamp and INFO level"""
-    _log("INFO ", msg)
+        log_pattern = conf.get("LOG_PATTERN")
+        self.log_filename = datetime.datetime.now().strftime(log_pattern)
 
-def warn(msg):
-    """Logs a message with timestamp and WARN level"""
-    _log("WARN ", msg)
+        directory = "/".join(self.log_filename.split("/")[:-1])
+        pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
 
-def error(msg):
-    """Logs a message with timestamp and ERROR level"""
-    _log("ERROR", msg)
 
-def _log(level, msg):
-    """Logs a message with timestamp"""
-    log_name = datetime.datetime.now().strftime("%Y-%m-%d.log")
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    def debug(self, msg: str):
+        """Logs a message with DEBUG level"""
+        self._log("DEBUG", msg)
 
-    full_msg = level + " | " + timestamp + " | " + str(msg)
 
-    print(full_msg)
+    def info(self, msg: str):
+        """Logs a message with INFO level"""
+        self._log("INFO ", msg)
 
-    with open(LOGS_DIR + "/" + log_name, "a") as file:
-        file.write(full_msg + "\n")
+
+    def warn(self, msg: str):
+        """Logs a message with WARN level"""
+        self._log("WARN ", msg)
+
+
+    def error(self, msg: str):
+        """Logs a message with ERROR level"""
+        self._log("ERROR", msg)
+
+
+    def _log(self, level: str, msg: str):
+        """Logs a message with a level"""
+
+        if level not in ["DEBUG", "INFO ", "WARN ", "ERROR"]:
+            raise ValueError()
+
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+        full_msg = f"{level} | {timestamp} | {msg}"
+
+        with open(self.log_filename, "a") as file:
+            file.write(full_msg + "\n")
+
+        if self.verbose_mode or level in ["INFO ", "WARN ", "ERROR"]:
+            print(full_msg)
