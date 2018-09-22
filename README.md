@@ -42,8 +42,9 @@ vim /opt/spotify-dude/data/dude.conf
 8. Add a new cron entry with `crontab -e` like:
 ```
 # Spotify Dude every 5 minutes:
-*/5 * * * * python3.6 /opt/spotify-dude/dude.py --roulette
+*/5 * * * * python3.6 /opt/spotify-dude/run --roulette --silent
 ```
+(run `/opt/spotify-dude/run --help` if needed)
 
 ## III. Usage
 
@@ -53,14 +54,14 @@ The process of adding friends or playlist is not friendly neither :(
 
 2. Insert some data in both `users` and `playlists` tables:
 ```
-    insert into users(name, spotify_id, mail) values
-    ('your name', 'your spotify user id', 'your email address'),
-    ('friend name', 'friend spotify user id', 'friend email address'),
-    ('another friend name', 'another friend spotify user id', 'another friend email address');
+    sqlite> insert into users(name, spotify_id, mail) values
+    sqlite> ('your name', 'your spotify user id', 'your email address'),
+    sqlite> ('friend name', 'friend spotify user id', 'friend email address'),
+    sqlite> ('another friend name', 'another friend spotify user id', 'another friend email address');
 
-    insert into playlists(name, spotify_id, songs_last_seen) values
-    ('a playlist name', 'playlist spotify id', 0)
-    ('another playlist name', 'another playlist spotify id', 0);
+    sqlite> insert into playlists(name, spotify_id, songs_last_seen) values
+    sqlite> ('a playlist name', 'playlist spotify id', 0)
+    sqlite> ('another playlist name', 'another playlist spotify id', 0);
 ```
 
 3. Let cron do its magic.
