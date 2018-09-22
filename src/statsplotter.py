@@ -25,15 +25,15 @@ def dict_as_bar_graph(data :dict, title: str, ylabel: str) -> str:
     for i, j in zip(y_pos, y_axis):
         plt.annotate(j, xy=(i, j), ha="center")
     
-    return _get_image_base64(TMP_FILENAME)
+    return _get_image_base64()
 
 
-def _get_image_base64(filename: str) -> str:
+def _get_image_base64() -> str:
     plt.savefig(TMP_FILENAME, format="png")
 
-    with open(filename, "rb") as file:
+    with open(TMP_FILENAME, "rb") as file:
         encoded_image = base64.b64encode(file.read()).decode("utf-8")
     
-    os.remove(filename)
+    os.remove(TMP_FILENAME)
 
     return encoded_image
