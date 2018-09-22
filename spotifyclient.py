@@ -16,7 +16,7 @@ class HttpMethod(object):
     delete = 4
 
 
-class ApiClient(object):
+class SpotifyClient(object):
     """Manages calls to the Spotify API"""
 
     BASE_URL = "https://api.spotify.com/v1"
@@ -29,8 +29,7 @@ class ApiClient(object):
         basic_auth = f"{conf.get('CLIENT_ID')}:{conf.get('CLIENT_SECRET')}"
         basic_auth = base64.b64encode(basic_auth.encode("utf-8")).decode("utf-8")
 
-        response = call_api(
-            method=HttpMethod.post,
+        response = self._post(
             url="https://accounts.spotify.com/api/token",
             headers={"Authorization": f"Basic {basic_auth}"},
             data={
@@ -51,62 +50,55 @@ class ApiClient(object):
     def get_playlist_name_from_id(self, playlist_id: str):
         """Returns the name of the playlist given its ID"""
 
-        response = call_api(
-            method=HttpMethod.get,
-            url=f"{ApiClient.BASE_URL}/users/{self.user_id}/playlists/{playlist_id}",
-            headers={"Authorization": "Bearer " + self._access_token}
-        )
-
+        response = self._get(f"{SpotifyClient.BASE_URL}/users/{self.user_id}/playlists/{playlist_id}")
         return response["name"]
 
 
     def get_all_tracks_from_playlist(self, playlist_id: str):
         """Returns a list of Spotify's track objects corresponding to the playlist ID given"""
 
-        response = call_api(
-            method=HttpMethod.get,
-            url=f"{ApiClient.BASE_URL}/users/{self.user_id}/playlists/{playlist_id}/tracks",
-            headers={"Authorization": f"Bearer {self._access_token}"}
-        )
+        tracks = []
 
-        return response["items"]
+        url = f"{SpotifyClient.BASE_URL}/users/{self.user_id}/playlists/{playlist_id}/tracks"
+
+        while url:
+            response = self._get(url)
+
+            if response["next"] != url:
+                url = response["next"]
+            else:
+                url = None
+
+            tracks += response["items"]
+
+        return tracks
 
 
     def get_all_playlists(self, page: int):
         """Returns a list of Spotify's playlist objects belonging to me"""
 
-        response = call_api(
-            method=HttpMethod.get,
-            url=f"{ApiClient.BASE_URL}/users/{self.user_id}/playlists?limit=50&offset={50 * page}",
-            headers={"Authorization": f"Bearer {self._access_token}"}
-        )
+        response = self._get(f"{SpotifyClient.BASE_URL}/users/{self.user_id}/playlists?limit=50&offset={50 * page}")
 
         return response["items"]
 
 
-def call_api(method: HttpMethod, url:str, headers: dict, data: dict = None):
-    """Generic API caller"""
-
-    if data is None:
-        data = {}
-
-    if method == HttpMethod.get:
-        response = requests.get(url, headers=headers, data=data)
-    elif method == HttpMethod.post:
+    def _post(self, url:str, headers: dict = None, data: dict = None) -> dict:
         response = requests.post(url, headers=headers, data=data)
-    elif method == HttpMethod.put:
-        response = requests.put(url, headers=headers, data=data)
-    elif method == HttpMethod.patch:
-        response = requests.patch(url, headers=headers, data=data)
-    elif method == HttpMethod.delete:
-        response = requests.delete(url, headers=headers, data=data)
-    else:
-        raise ValueError()
 
-    if response.status_code != 200:
-        raise RestError(f"{response.status_code}: {response.json()}")
-    else:
-        return response.json()
+        if response.status_code != 200:
+            raise RestError(f"{response.status_code}: {response.json()}")
+        else:
+            return response.json()
+
+
+    def _get(self, url:str, data: dict = None) -> dict:
+        headers = {"Authorization": f"Bearer {self._access_token}"}
+        response = requests.get(url, headers=headers, data=data)
+
+        if response.status_code != 200:
+            raise RestError(f"{response.status_code}: {response.json()}")
+        else:
+            return response.json()
 
 
 class RestError(Exception):

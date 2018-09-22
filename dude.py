@@ -6,7 +6,7 @@ import random
 import traceback
 
 from logger import Logger
-from apiclient import ApiClient
+from spotifyclient import SpotifyClient
 from dbmanager import DbManager
 from mailer import Mailer
 
@@ -25,8 +25,8 @@ class Dude(object):
         there_were_changes = False
 
         self.logger.debug("Initializing Spotify API client...")
-        api = ApiClient()
-        self.logger.debug(f"... success, access key gotten: [{api.get_access_token()}]")
+        spotify = SpotifyClient()
+        self.logger.debug(f"... success, access key gotten: [{spotify.get_access_token()}]")
 
         self.logger.debug("Getting all the playlists from DB...")
         playlists = self.db.get_all_playlists()
@@ -35,11 +35,11 @@ class Dude(object):
         for playlist in playlists:
             try:
                 self.logger.debug(f"Getting all tracks in [{playlist.name}] from Spotify API...")
-                tracks = api.get_all_tracks_from_playlist(playlist.spotify_id)
+                tracks = spotify.get_all_tracks_from_playlist(playlist.spotify_id)
                 self.logger.debug(f"... gotten {len(tracks)} tracks")
 
                 self.logger.debug("Checking the playlist name...")
-                current_name = api.get_playlist_name_from_id(playlist.spotify_id)
+                current_name = spotify.get_playlist_name_from_id(playlist.spotify_id)
 
                 if playlist.name != current_name:
                     playlist.name = current_name

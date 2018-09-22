@@ -3,7 +3,7 @@
 import smtplib
 
 import confmanager as conf
-import dbmanager as db
+from dbmanager import DbManager
 from entities import Playlist
 from entities import User
 
@@ -37,6 +37,7 @@ class Mailer(object):
     def send_mail(self):
         """Sends an email"""
 
+        db = DbManager()
         receivers = db.get_all_users()
         receivers_line = ""
         mail_addresses = []
