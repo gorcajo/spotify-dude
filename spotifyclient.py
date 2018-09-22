@@ -43,6 +43,7 @@ class SpotifyClient(object):
 
     def get_access_token(self):
         """Returns a reduced version of the access token, suitable for logging"""
+        
         reduced_token = f"{self._access_token[:8]}...{self._access_token[-8:]}"
         return reduced_token
 
@@ -78,7 +79,6 @@ class SpotifyClient(object):
         """Returns a list of Spotify's playlist objects belonging to me"""
 
         response = self._get(f"{SpotifyClient.BASE_URL}/users/{self.user_id}/playlists?limit=50&offset={50 * page}")
-
         return response["items"]
 
 
