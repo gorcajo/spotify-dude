@@ -8,8 +8,12 @@ import confmanager as conf
 
 class Logger(object):
 
-    def __init__(self, verbose_mode: bool = True):
+    def __init__(self, verbose_mode: bool = True, silent_mode: bool = False):
+        if verbose_mode and silent_mode:
+            raise ValueError()
+
         self.verbose_mode = verbose_mode
+        self.silent_mode = silent_mode
 
         log_pattern = conf.get("LOG_PATTERN")
         self.log_filename = datetime.datetime.now().strftime(log_pattern)
@@ -51,5 +55,6 @@ class Logger(object):
         with open(self.log_filename, "a") as file:
             file.write(full_msg + "\n")
 
-        if self.verbose_mode or level in ["INFO ", "WARN ", "ERROR"]:
-            print(full_msg)
+        if not self.silent_mode:
+            if self.verbose_mode or level in ["INFO ", "WARN ", "ERROR"]:
+                print(full_msg)
