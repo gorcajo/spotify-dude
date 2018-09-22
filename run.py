@@ -29,12 +29,12 @@ def main():
     logger.info("Started")
 
     try:
-        db = DbManager(logger)
-        mailer = Mailer(logger, db, subject="Spotify update!")
-        dude = Dude(logger, db, mailer)
+        db = DbManager(logger=logger)
+        mailer = Mailer(logger=logger, db_manager=db, subject="Spotify update!")
+        dude = Dude(logger=logger, db_manager=db, mailer=mailer, debug_mode=args.debug)
 
         if args.roulette:
-            dude.roulette(debug_mode=args.debug)
+            dude.roulette()
     
     except:
         logger.error(f"Exception happened:\n{traceback.format_exc()}")

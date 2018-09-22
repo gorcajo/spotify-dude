@@ -58,7 +58,7 @@ class SpotifyClient(object):
         return response["name"]
 
 
-    def get_all_tracks_from_playlist(self, playlist_id: str):
+    def get_all_songs_from_playlist(self, playlist_id: str):
         """Returns a list of Spotify's track objects corresponding to the playlist ID given"""
 
         tracks = []

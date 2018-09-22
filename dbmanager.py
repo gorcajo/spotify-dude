@@ -134,4 +134,9 @@ class DbManager(object):
     
 
     def _log_query(self, query: str):
-        self.logger.debug(f"  {query}")
+        log_lines = []
+
+        for line in query.splitlines():
+            log_lines += [line.strip()]
+
+        self.logger.debug(f"  {' '.join(log_lines)}")

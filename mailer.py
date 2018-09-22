@@ -22,19 +22,30 @@ class Mailer(object):
         self.logger = logger
         self.db = db_manager
         self.subject = subject
-        self.email_content = ""
+        self.email_contents = []
 
 
-    def add_new_element(self, playlist: Playlist, last_adder: User, track_name: str, track_artists: str, next_adder: User):
+    def add_new_element_as_new_song(self, playlist: Playlist, last_adder: User, track_name: str, track_artists: str, next_adder: User):
         """Adds a new element, consisting in the playlist name just modified,
         the last adder, the track's name and the track's artists"""
 
-        self.email_content += f"<h2>{playlist.name}</h2>"
-        self.email_content += f"<p>El último en añadir una canción fue "
-        self.email_content += f"<strong>{last_adder.name}</strong>"
-        self.email_content += f":</p>"
-        self.email_content += f'<p>   "{track_name}" de {track_artists}</p>'
-        self.email_content += f"<p>Le toca a... <strong>{next_adder.name}</strong>!</p>"
+        element = f"<h2>{playlist.name}</h2>"
+        element += f"<p>El último en añadir una canción fue "
+        element += f"<strong>{last_adder.name}</strong>"
+        element += f":</p>"
+        element += f'<p>   "{track_name}" de {track_artists}</p>'
+        element += f"<p>Le toca añadir... <strong>{next_adder.name}</strong>!</p>"
+        self.email_contents += [element]
+
+
+    def add_new_element_as_deleted_song(self, playlist: Playlist, next_adder: User):
+        """Adds a new element, consisting in the playlist name just modified,
+        the last adder, the track's name and the track's artists"""
+
+        element = f"<h2>{playlist.name}</h2>"
+        element += f"<p>Alguien ha borrado una canción</p>"
+        element += f"<p>Le toca añadir... <strong>{next_adder.name}</strong>!</p>"
+        self.email_contents += [element]
 
 
     def send_mail(self):
@@ -58,8 +69,12 @@ class Mailer(object):
         body += "MIME-Version: 1.0\r\n"
         body += "Content-type: text/html\r\n"
         body += "\r\n"
-        body += f"<html><head></head><body><h1>{self.subject}</h1>"
-        body += f"{self.email_content}</body></html>"
+        body += f"<html><head></head><body><h1>{self.subject}</h1>\n"
+
+        for element in self.email_contents:
+            body += f"{element}\n"
+        
+        body += "</body></html>"
 
         self.logger.debug(f"Generated email body:\n{body}")
 
