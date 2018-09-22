@@ -114,15 +114,15 @@ class Dude(object):
             self.db.update_playlist_songs(playlist, current_song_count)
     
 
-    def _update_with_deleted_song(self, stored_playlist: Playlist, current_song_count: int):
+    def _update_with_deleted_song(self, playlist: Playlist, current_song_count: int):
         self.logger.debug(f"Getting all users from DB to do the lottery...")
         all_users = self.db.get_all_users()
         next_adder = random.choice(all_users)
         self.logger.debug(f"Next random adder: [{next_adder.name}]")
 
-        self.mailer.add_new_event_as_deleted_song(stored_playlist, next_adder)
+        self.mailer.add_new_event_as_deleted_song(playlist, next_adder)
 
         if not self.debug_mode:
-            self.logger.debug(f"Updating playlist [{stored_playlist.name}] in DB...")
-            self.db.update_playlist_songs(stored_playlist, current_song_count)
+            self.logger.debug(f"Updating playlist [{playlist.name}] in DB...")
+            self.db.update_playlist_songs(playlist, current_song_count)
             self.logger.debug(f"... done")
