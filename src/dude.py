@@ -77,11 +77,11 @@ class Dude(object):
         for user_in_db in self.db.get_all_users():
             all_users[user_in_db.spotify_id] = user_in_db
 
-        for stored_playlist in stored_playlists:
+        for playlist in stored_playlists:
             try:
                 songs = []
 
-                for spotify_song in self.spotify.get_all_songs_from_playlist(stored_playlist):
+                for spotify_song in self.spotify.get_all_songs_from_playlist(playlist):
                     adder = all_users[spotify_song["added_by"]["id"]]
                     songs += [Song(spotify_song, adder)]
                 
@@ -93,9 +93,9 @@ class Dude(object):
                     else:
                         songs_added_per_user[song.added_by.name] += 1
                 
+                # TODO:
                 self.logger.debug("Generating 'songs per user' graph...")
                 graph_base64 = statsplotter.dict_as_bar_graph(songs_added_per_user, "Canciones/persona", "Canciones")
-                # TODO
                 print(graph_base64)
                 self.logger.debug("... done")
 

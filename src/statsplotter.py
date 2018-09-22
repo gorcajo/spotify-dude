@@ -25,8 +25,7 @@ def dict_as_bar_graph(data :dict, title: str, ylabel: str) -> str:
     # for i, j in zip(y_pos, y_axis):
     #     plt.annotate(j, xy=(i, j), ha="center")
     
-    # return _get_image_base64()
-    pass
+    return _get_image_base64()
 
 
 def _get_image_base64() -> str:
@@ -38,4 +37,4 @@ def _get_image_base64() -> str:
     # os.remove(TMP_FILENAME)
 
     # return encoded_image
-    pass
+    return None
