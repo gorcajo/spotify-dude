@@ -29,7 +29,8 @@ class SpotifyClient(object):
         basic_auth = f"{conf.get('CLIENT_ID')}:{conf.get('CLIENT_SECRET')}"
         basic_auth = base64.b64encode(basic_auth.encode("utf-8")).decode("utf-8")
 
-        response = self._post(
+
+        response = requests.post(
             url="https://accounts.spotify.com/api/token",
             headers={"Authorization": f"Basic {basic_auth}"},
             data={
@@ -38,12 +39,15 @@ class SpotifyClient(object):
             }
         )
 
-        self._access_token = response["access_token"]
+        if response.status_code == 200:
+            self._access_token = response.json()["access_token"]
+        else:
+            raise RestError(f"{response.status_code}: {response.json()}")
 
 
     def get_access_token(self):
         """Returns a reduced version of the access token, suitable for logging"""
-        
+
         reduced_token = f"{self._access_token[:8]}...{self._access_token[-8:]}"
         return reduced_token
 
@@ -82,24 +86,14 @@ class SpotifyClient(object):
         return response["items"]
 
 
-    def _post(self, url:str, headers: dict = None, data: dict = None) -> dict:
-        response = requests.post(url, headers=headers, data=data)
-
-        if response.status_code != 200:
-            raise RestError(f"{response.status_code}: {response.json()}")
-        else:
-            return response.json()
-
-
     def _get(self, url:str, data: dict = None) -> dict:
         headers = {"Authorization": f"Bearer {self._access_token}"}
         response = requests.get(url, headers=headers, data=data)
 
-        if response.status_code != 200:
-            raise RestError(f"{response.status_code}: {response.json()}")
-        else:
+        if response.status_code == 200:
             return response.json()
-
+        else:
+            raise RestError(f"{response.status_code}: {response.json()}")
 
 class RestError(Exception):
     """Exception to be raised when an unexpected status code from a RESTful API is gotten"""
