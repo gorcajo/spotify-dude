@@ -36,7 +36,7 @@ class Dude(object):
         for playlist in playlists:
             try:
                 spotify_songs = self.spotify.get_all_songs_from_playlist(playlist)
-                current_name = self.spotify.get_playlist_name_from_id(playlist)
+                current_name = self.spotify.get_name_from_playlist(playlist)
 
                 if playlist.name != current_name:
                     playlist.name = current_name
