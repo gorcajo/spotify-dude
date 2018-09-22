@@ -29,7 +29,6 @@ class SpotifyClient(object):
         basic_auth = f"{conf.get('CLIENT_ID')}:{conf.get('CLIENT_SECRET')}"
         basic_auth = base64.b64encode(basic_auth.encode("utf-8")).decode("utf-8")
 
-
         response = requests.post(
             url="https://accounts.spotify.com/api/token",
             headers={"Authorization": f"Basic {basic_auth}"},
@@ -94,6 +93,7 @@ class SpotifyClient(object):
             return response.json()
         else:
             raise RestError(f"{response.status_code}: {response.json()}")
+
 
 class RestError(Exception):
     """Exception to be raised when an unexpected status code from a RESTful API is gotten"""
