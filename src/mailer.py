@@ -100,7 +100,7 @@ class Mailer(object):
 
         for element in self.new_songs:
             body += f"<h2>{element['playlist'].name}</h2>\n"
-            body += f"<p>El último en añadir una canción fue <strong>{element['last_adder'].name}</strong>:</p>\n"
+            body += f"<p><strong>{element['last_adder'].name}</strong> acaba de añadir una canción:</p>\n"
             body += f'<p>"{element["song"].name}" de {element["song"].get_artists_str()}</p>\n'
 
             if element["song"].cover_url is not None:
@@ -116,12 +116,12 @@ class Mailer(object):
 
                 attachment_index += 1
 
-            body += f"<p>Le toca añadir a... <strong>{element['next_adder'].name}</strong>!</p>\n"
+            body += f"<p>Le toca poner canción a... <strong>{element['next_adder'].name}</strong>!</p>\n"
 
         for element in self.deleted_songs:
             body += f"<h2>{element['playlist'].name}</h2>\n"
             body += f"<p>Alguien ha borrado canciones!</p>\n"
-            body += f"<p>Le toca añadir a... <strong>{element['next_adder'].name}</strong>!</p>\n"
+            body += f"<p>Le toca poner canción a... <strong>{element['next_adder'].name}</strong>!</p>\n"
         
         for imagepath in self.stats:
             cid = f"stats{attachment_index}"

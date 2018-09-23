@@ -89,9 +89,9 @@ class Song(object):
     
 
     def get_artists_str(self):
-        artists_names = []
+        if len(self.artists) > 1:
+            artists_names = [artist.name for artist in self.artists[:-1]]
 
-        for artist in self.artists:
-            artists_names += [artist.name]
-
-        return ", ".join(artists_names)
+            return ", ".join(artists_names) + " y " + self.artists[-1].name
+        else:
+            return self.artists[0].name
