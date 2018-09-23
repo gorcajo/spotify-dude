@@ -120,7 +120,7 @@ class Mailer(object):
 
         for element in self.deleted_songs:
             body += f"<h2>{element['playlist'].name}</h2>\n"
-            body += f"<p>Alguien ha borrado una canción!</p>\n"
+            body += f"<p>Alguien ha borrado canciones!</p>\n"
             body += f"<p>Le toca añadir a... <strong>{element['next_adder'].name}</strong>!</p>\n"
         
         for imagepath in self.stats:
