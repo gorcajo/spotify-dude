@@ -1,5 +1,6 @@
 from datetime import datetime
 from sqlite3 import Row
+from typing import List
 
 
 class User(object):
@@ -96,3 +97,21 @@ class Song(object):
             return ", ".join(artists_names) + " y " + self.artists[-1].name
         else:
             return self.artists[0].name
+
+
+class Plottable(object):
+
+    def __init__(self, title: str, ylabel: str, data: dict = None):
+        self.title = title
+        self.ylabel = ylabel
+        self.x_axis: List[str] = []
+        self.y_axis: List[int] = []
+
+        if data is not None:
+            for key, value in data.items():
+                self.add_value(key, value)
+    
+
+    def add_value(self, x_value: str, y_value: int):
+        self.x_axis += [x_value]
+        self.y_axis += [y_value]

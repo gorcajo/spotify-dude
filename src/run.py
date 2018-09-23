@@ -46,7 +46,6 @@ def main():
     
     except:
         logger.error(f"Exception happened:\n{traceback.format_exc()}")
-
-
+    
 if __name__ == "__main__":
     main()

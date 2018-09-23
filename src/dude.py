@@ -12,6 +12,7 @@ from typing import List
 from entities import Playlist
 from entities import Song
 from entities import User
+from entities import Plottable
 from logger import Logger
 from spotifyclient import SpotifyClient
 from dbmanager import DbManager
@@ -103,6 +104,8 @@ class Dude(object):
 
                 # Songs per user stats:
 
+                self.logger.debug("Generating 'songs per user' graph...")
+
                 songs_added_per_user = {}
 
                 for song in songs:
@@ -111,30 +114,47 @@ class Dude(object):
                     else:
                         songs_added_per_user[song.added_by.name] += 1
 
-                self.logger.debug("Generating 'songs per user' graph...")
-                # graph_path = statsplotter.dict_as_bar_graph(songs_added_per_user, "Canciones/persona", "Canciones")
-                # self.mailer.add_new_graph(graph_path)
+                plottable = Plottable("Canciones/persona", "Canciones", songs_added_per_user)
+                graph_path = statsplotter.plot_as_bar_graph(plottable)
+                self.mailer.add_new_graph(graph_path)
                 self.logger.debug("... done")
 
-                # Songs per genre stats:
+                # Activity stats:
+
+                self.logger.debug("Generating 'songs per user' graph...")
+
+                plottable = Plottable("Actividad de las últimas semanas", "Canciones puestas")
+
+                self._obtain_oldest_song(songs).added_at
+
+                activity = {}
+
+                for year in range(2018, datetime.datetime.now().year + 1):
+                    for week in range(1, 52 + 1):
+                        year_now = datetime.datetime.now().year
+                        week_now = datetime.datetime.now().isocalendar()[1]
+
+                        if year == year_now and week == week_now + 1:
+                            break
+
+                        for song in songs:
+                            if week == song.added_at.isocalendar()[1] and year == song.added_at.year:
+                                if f"{year}-{week}" not in activity:
+                                    activity[f"{year}-{week}"] = 1
+                                else:
+                                    activity[f"{year}-{week}"] += 1
+                            else:
+                                if f"{year}-{week}" not in activity:
+                                    activity[f"{year}-{week}"] = 0
+
+                for value in activity.values():
+                    plottable.add_value("", value)
                 
-                songs_per_genre = {}
-                genres = []
+                plottable.x_axis = plottable.x_axis[-4:]
+                plottable.y_axis = plottable.y_axis[-4:]
 
-                if not self.debug_mode:
-                    genres = self.spotify.get_genres_from_song_list(songs)
-                else:
-                    genres = ["rock"]*16 + ["metal"]*8 + ["blues"]*4 + ["jazz"]*2 + ["classic"]
-
-                for genre in genres:
-                    if genre not in songs_per_genre:
-                        songs_per_genre[genre] = 1
-                    else:
-                        songs_per_genre[genre] += 1
-
-                self.logger.debug("Generating 'songs per genre' graph...")
-                # graph_path = statsplotter.dict_as_bar_graph(songs_per_genre, "Canciones/genero", "Canciones")
-                # self.mailer.add_new_graph(graph_path)
+                graph_path = statsplotter.plot_as_line_graph(plottable)
+                self.mailer.add_new_graph(graph_path)
                 self.logger.debug("... done")
 
                 # Sending mail:
@@ -219,6 +239,18 @@ class Dude(object):
 
         for song in songs:
             if song.added_at > most_recent_added_at:
+                most_recent_song = song
+                most_recent_added_at = song.added_at
+        
+        return most_recent_song
+
+
+    def _obtain_oldest_song(self, songs: List[Song]):
+        most_recent_song: Song = None
+        most_recent_added_at = datetime.datetime.now() + datetime.timedelta(days=1000*365)
+
+        for song in songs:
+            if song.added_at < most_recent_added_at:
                 most_recent_song = song
                 most_recent_added_at = song.added_at
         
