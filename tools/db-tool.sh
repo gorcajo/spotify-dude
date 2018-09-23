@@ -56,7 +56,8 @@ function installDb() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT,
                 spotify_id TEXT,
-                songs_last_seen INTEGER
+                songs_last_seen INTEGER,
+                songs_hash TEXT
             )"
 
         echo "DB successfully installed."

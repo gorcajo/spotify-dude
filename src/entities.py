@@ -28,6 +28,7 @@ class Playlist(object):
         self.name = row["name"]
         self.spotify_id = row["spotify_id"]
         self.songs_last_seen = row["songs_last_seen"]
+        self.songs_hash = row["songs_hash"]
 
 
     def __str__(self):

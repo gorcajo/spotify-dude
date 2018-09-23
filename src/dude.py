@@ -3,6 +3,7 @@
 """
 
 import datetime
+import hashlib
 import random
 import requests
 import traceback
@@ -10,6 +11,7 @@ from typing import List
 
 from entities import Playlist
 from entities import Song
+from entities import User
 from logger import Logger
 from spotifyclient import SpotifyClient
 from dbmanager import DbManager
@@ -48,14 +50,24 @@ class Dude(object):
                 spotify_songs = self.spotify.get_all_songs_from_playlist(playlist)
 
                 if playlist.songs_last_seen == len(spotify_songs):
-                    self.logger.debug("There are no song changes, playlist skipped")
+                    spotify_songs_hash = hashlib.md5(str(spotify_songs).encode()).hexdigest()
+
+                    if spotify_songs_hash == playlist.songs_hash:
+                        self.logger.debug("There are no song changes, playlist skipped")
+                    else:
+                        self.logger.debug(f"Somebody changed songs (before: {playlist.songs_hash}, now: {spotify_songs_hash}), an update will be made")
+                        self._update_with_changed_songs(playlist, spotify_songs, spotify_songs_hash)
+                        there_were_changes = True
+
                 elif playlist.songs_last_seen < len(spotify_songs):
                     self.logger.debug(f"Somebody added songs (before: {playlist.songs_last_seen}, now: {len(spotify_songs)}), an update will be made")
                     self._update_with_added_song(playlist, spotify_songs)
                     there_were_changes = True
+
                 else:
                     self.logger.debug(f"Somebody deleted songs (before: {playlist.songs_last_seen}, now: {len(spotify_songs)}), an update will be made")
-                    self._update_with_deleted_song(playlist, len(spotify_songs))
+                    spotify_songs_hash = hashlib.md5(str(spotify_songs).encode()).hexdigest()
+                    self._update_with_deleted_songs(playlist, len(spotify_songs), spotify_songs_hash)
                     there_were_changes = True
 
             except:
@@ -139,42 +151,26 @@ class Dude(object):
     def _update_with_added_song(self, playlist: Playlist, spotify_songs: List[dict]):
         self.logger.debug(f"Retrieving the last song added along with its data")
 
-        all_users = {}
-
-        for user_in_db in self.db.get_all_users():
-            all_users[user_in_db.spotify_id] = user_in_db
-
-        songs = []
-
-        for spotify_song in spotify_songs:
-            added_by_spotify_id = spotify_song["added_by"]["id"]
-            added_by = all_users[added_by_spotify_id]
-            songs += [Song(spotify_song, added_by)]
-
-        most_recent_song = None
-        most_recent_added_at = datetime.datetime.now() - datetime.timedelta(days=1000*365)
-
-        for song in songs:
-            if song.added_at > most_recent_added_at:
-                most_recent_song = song
-                most_recent_added_at = song.added_at
-
+        all_users = self.db.get_all_users()
+        songs = self._convert_spotify_songs(spotify_songs, all_users)
+        most_recent_song = self._obtain_most_recent_song(songs)
         self.logger.debug(f"Most recently added song song was [{most_recent_song}]")
 
         next_adder = most_recent_song.added_by
 
         while next_adder.id == most_recent_song.added_by.id:
-            next_adder = random.choice(list(all_users.values()))
+            next_adder = random.choice(all_users)
 
         self.logger.debug(f"Next random adder: [{next_adder.name}]")
 
-        self.mailer.add_new_event_as_new_song(playlist, most_recent_song.added_by, song, next_adder)
+        self.mailer.add_new_event_as_new_song(playlist, most_recent_song.added_by, most_recent_song, next_adder)
 
         if not self.debug_mode:
-            self.db.update_playlist_songs(playlist, len(songs))
+            new_songs_hash = hashlib.md5(str(spotify_songs).encode()).hexdigest()
+            self.db.update_playlist_songs(playlist, len(songs), new_songs_hash)
     
 
-    def _update_with_deleted_song(self, playlist: Playlist, current_song_count: int):
+    def _update_with_deleted_songs(self, playlist: Playlist, current_song_count: int, new_songs_hash: str):
         self.logger.debug(f"Getting all users from DB to do the lottery...")
         all_users = self.db.get_all_users()
         next_adder = random.choice(all_users)
@@ -183,6 +179,47 @@ class Dude(object):
         self.mailer.add_new_event_as_deleted_song(playlist, next_adder)
 
         if not self.debug_mode:
-            self.logger.debug(f"Updating playlist [{playlist.name}] in DB...")
-            self.db.update_playlist_songs(playlist, current_song_count)
-            self.logger.debug(f"... done")
+            self.db.update_playlist_songs(playlist, current_song_count, new_songs_hash)
+    
+
+    def _update_with_changed_songs(self, playlist: Playlist, spotify_songs: List[dict], new_hash: str):
+        all_users = self.db.get_all_users()
+        songs = self._convert_spotify_songs(spotify_songs, all_users)
+        most_recent_song = self._obtain_most_recent_song(songs)
+        self.logger.debug(f"After changes, most recent song song is [{most_recent_song}]")
+        
+        next_adder = random.choice(all_users)
+        self.logger.debug(f"Next random adder: [{next_adder.name}]")
+
+        self.mailer.add_new_event_as_changed_songs(playlist, most_recent_song, next_adder)
+
+        if not self.debug_mode:
+            self.db.update_playlist_songs_hash(playlist, new_hash)
+
+
+    def _convert_spotify_songs(self, spotify_songs: List[dict], users: List[User]) -> List[Song]:
+        users_dict = {}
+
+        for user in users:
+            users_dict[user.spotify_id] = user
+
+        songs = []
+
+        for spotify_song in spotify_songs:
+            added_by_spotify_id = spotify_song["added_by"]["id"]
+            added_by = users_dict[added_by_spotify_id]
+            songs += [Song(spotify_song, added_by)]
+        
+        return songs
+
+
+    def _obtain_most_recent_song(self, songs: List[Song]):
+        most_recent_song: Song = None
+        most_recent_added_at = datetime.datetime.now() - datetime.timedelta(days=1000*365)
+
+        for song in songs:
+            if song.added_at > most_recent_added_at:
+                most_recent_song = song
+                most_recent_added_at = song.added_at
+        
+        return most_recent_song

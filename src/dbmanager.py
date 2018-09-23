@@ -83,7 +83,7 @@ class DbManager(object):
             self.logger.debug(f"... done")
 
 
-    def update_playlist_songs(self, playlist: Playlist, new_song_count: int):
+    def update_playlist_songs(self, playlist: Playlist, new_song_count: int, new_hash: str):
         """Updates the playlist's songs"""
 
         with sqlite3.connect(self.db_file) as conn:
@@ -93,7 +93,30 @@ class DbManager(object):
                 f"UPDATE",
                 f"  playlists",
                 f"SET",
-                f"  songs_last_seen = {new_song_count}",
+                f"  songs_last_seen = {new_song_count},",
+                f"  songs_hash = '{new_hash}'",
+                f"WHERE",
+                f"  id = {playlist.id}",
+            ])
+
+            self._log_query(qry)
+
+            conn.cursor().execute(qry)
+            
+            self.logger.debug(f"... done")
+    
+
+    def update_playlist_songs_hash(self, playlist: Playlist, new_hash: str):
+        """Updates the playlist's songs hash"""
+
+        with sqlite3.connect(self.db_file) as conn:
+            conn.row_factory = sqlite3.Row
+
+            qry = "\n".join([
+                f"UPDATE",
+                f"  playlists",
+                f"SET",
+                f"  songs_hash = '{new_hash}'",
                 f"WHERE",
                 f"  id = {playlist.id}",
             ])

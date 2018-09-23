@@ -29,6 +29,7 @@ class Mailer(object):
         self.db = db_manager
         self.new_songs = []
         self.deleted_songs = []
+        self.changed_songs = []
         self.stats = []
 
 
@@ -48,6 +49,16 @@ class Mailer(object):
 
         self.deleted_songs += [{
             "playlist": playlist,
+            "next_adder": next_adder
+        }]
+
+
+    def add_new_event_as_changed_songs(self, playlist: Playlist, most_recent_song: Song, next_adder: User):
+        """Adds a new element"""
+
+        self.changed_songs += [{
+            "playlist": playlist,
+            "most_recent_song": most_recent_song,
             "next_adder": next_adder
         }]
 
@@ -121,6 +132,12 @@ class Mailer(object):
         for element in self.deleted_songs:
             body += f"<h2>{element['playlist'].name}</h2>\n"
             body += f"<p>Alguien ha borrado canciones!</p>\n"
+            body += f"<p>Le toca poner canción a... <strong>{element['next_adder'].name}</strong>!</p>\n"
+
+        for element in self.changed_songs:
+            body += f"<h2>{element['playlist'].name}</h2>\n"
+            body += f"<p>Alguien ha cambiado canciones!</p>\n"
+            body += f"<p><strong>{element['most_recent_song'].added_by.name}</strong>, has sito tú? No toques las cosas que no son de tocar!</p>\n"
             body += f"<p>Le toca poner canción a... <strong>{element['next_adder'].name}</strong>!</p>\n"
         
         for imagepath in self.stats:
