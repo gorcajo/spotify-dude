@@ -2,9 +2,11 @@
     The Spotify Dude app!
 """
 
+import datetime
 import random
 import requests
 import traceback
+from typing import List
 
 from entities import Playlist
 from entities import Song
@@ -49,7 +51,7 @@ class Dude(object):
                     self.logger.debug("There are no song changes, playlist skipped")
                 elif playlist.songs_last_seen < len(spotify_songs):
                     self.logger.debug(f"Somebody added songs (before: {playlist.songs_last_seen}, now: {len(spotify_songs)}), an update will be made")
-                    self._update_with_added_song(playlist, spotify_songs[-1], len(spotify_songs))
+                    self._update_with_added_song(playlist, spotify_songs)
                     there_were_changes = True
                 else:
                     self.logger.debug(f"Somebody deleted songs (before: {playlist.songs_last_seen}, now: {len(spotify_songs)}), an update will be made")
@@ -134,28 +136,42 @@ class Dude(object):
                 self.logger.warn(f"Exception happened:\n{traceback.format_exc()}")
     
 
-    def _update_with_added_song(self, playlist: Playlist, last_spotify_song: dict, current_song_count: int):
+    def _update_with_added_song(self, playlist: Playlist, spotify_songs: List[dict]):
         self.logger.debug(f"Retrieving the last song added along with its data")
 
-        adder = self.db.find_user_by_spotify_id(last_spotify_song["added_by"]["id"])
-        song = Song(last_spotify_song, adder)
+        all_users = {}
 
-        self.logger.debug(f"Last song was [{song}]")
+        for user_in_db in self.db.get_all_users():
+            all_users[user_in_db.spotify_id] = user_in_db
 
-        next_adder = adder
+        songs = []
 
-        self.logger.debug(f"Getting all users from DB to do the lottery...")
-        all_users = self.db.get_all_users()
+        for spotify_song in spotify_songs:
+            added_by_spotify_id = spotify_song["added_by"]["id"]
+            added_by = all_users[added_by_spotify_id]
+            songs += [Song(spotify_song, added_by)]
 
-        while next_adder.id == adder.id:
-            next_adder = random.choice(all_users)
+        most_recent_song = None
+        most_recent_added_at = datetime.datetime.now() - datetime.timedelta(days=1000*365)
+
+        for song in songs:
+            if song.added_at > most_recent_added_at:
+                most_recent_song = song
+                most_recent_added_at = song.added_at
+
+        self.logger.debug(f"Most recently added song song was [{most_recent_song}]")
+
+        next_adder = most_recent_song.added_by
+
+        while next_adder.id == most_recent_song.added_by.id:
+            next_adder = random.choice(list(all_users.values()))
 
         self.logger.debug(f"Next random adder: [{next_adder.name}]")
 
-        self.mailer.add_new_event_as_new_song(playlist, adder, song, next_adder)
+        self.mailer.add_new_event_as_new_song(playlist, most_recent_song.added_by, song, next_adder)
 
         if not self.debug_mode:
-            self.db.update_playlist_songs(playlist, current_song_count)
+            self.db.update_playlist_songs(playlist, len(songs))
     
 
     def _update_with_deleted_song(self, playlist: Playlist, current_song_count: int):
