@@ -63,7 +63,7 @@ class Mailer(object):
         }]
 
 
-    def add_new_stat(self, imagepath: str):
+    def add_new_graph(self, imagepath: str):
         """Adds a new element"""
 
         self.stats += [imagepath]

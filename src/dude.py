@@ -113,7 +113,7 @@ class Dude(object):
 
                 self.logger.debug("Generating 'songs per user' graph...")
                 # graph_path = statsplotter.dict_as_bar_graph(songs_added_per_user, "Canciones/persona", "Canciones")
-                # self.mailer.add_new_stat(graph_path)
+                # self.mailer.add_new_graph(graph_path)
                 self.logger.debug("... done")
 
                 # Songs per genre stats:
@@ -134,7 +134,7 @@ class Dude(object):
 
                 self.logger.debug("Generating 'songs per genre' graph...")
                 # graph_path = statsplotter.dict_as_bar_graph(songs_per_genre, "Canciones/genero", "Canciones")
-                # self.mailer.add_new_stat(graph_path)
+                # self.mailer.add_new_graph(graph_path)
                 self.logger.debug("... done")
 
                 # Sending mail:
@@ -186,8 +186,8 @@ class Dude(object):
         all_users = self.db.get_all_users()
         songs = self._convert_spotify_songs(spotify_songs, all_users)
         most_recent_song = self._obtain_most_recent_song(songs)
-        self.logger.debug(f"After changes, most recent song song is [{most_recent_song}]")
-        
+        self.logger.debug(f"After changes, most recent song is [{most_recent_song}]")
+
         next_adder = random.choice(all_users)
         self.logger.debug(f"Next random adder: [{next_adder.name}]")
 
