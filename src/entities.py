@@ -38,6 +38,21 @@ class Playlist(object):
         return self.__str__()
 
 
+class Artist(object):
+
+    def __init__(self, spotify_artist: dict):
+        self.name = spotify_artist["name"]
+        self.spotify_id = spotify_artist["id"]
+
+
+    def __str__(self):
+        return self.name
+
+
+    def __repr__(self):
+        return self.__str__()
+
+
 class Song(object):
 
     def __init__(self, spotify_song: dict, added_by: User):
@@ -45,12 +60,10 @@ class Song(object):
         self.name = spotify_song["track"]["name"]
         self.album_spotify_id = spotify_song["track"]["album"]["id"]
 
-        self.artists = ""
+        self.artists = []
 
-        for artist in spotify_song["track"]["artists"]:
-            self.artists += artist["name"] + ", "
-
-        self.artists = self.artists[:-2]
+        for spotify_artist in spotify_song["track"]["artists"]:
+            self.artists += [Artist(spotify_artist)]
 
         self.added_at = datetime.strptime(spotify_song["added_at"], "%Y-%m-%dT%H:%M:%SZ")
         
@@ -68,8 +81,17 @@ class Song(object):
 
 
     def __str__(self):
-        return str(f"'{self.name}' by '{self.artists}' added by '{self.added_by.name}'")
+        return f"'{self.name}' by '{self.get_artists_str()}' added by '{self.added_by.name}'"
 
 
     def __repr__(self):
         return self.__str__()
+    
+
+    def get_artists_str(self):
+        artists_names = []
+
+        for artist in self.artists:
+            artists_names += [artist.name]
+
+        return ", ".join(artists_names)

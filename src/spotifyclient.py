@@ -2,6 +2,7 @@
 
 import base64
 import requests
+from typing import List
 
 import confmanager as conf
 from entities import Playlist
@@ -85,6 +86,23 @@ class SpotifyClient(object):
         self.logger.debug(f"... gotten {len(tracks)} songs")
 
         return tracks
+
+
+    def get_genres_from_song_list(self, songs: List[Song]) -> List[str]:
+        """Returns a list of genres associated with the song's artist"""
+
+        self.logger.debug(f"Getting all genres associated with {len(songs)} songs from Spotify API...")
+
+        genres = []
+
+        for song in songs:
+            for artist in song.artists:
+                response = self._get(f"{SpotifyClient.BASE_URL}/artists/{artist.spotify_id}")
+                genres += response["genres"]
+
+        self.logger.debug(f"... gotten {len(genres)}")
+
+        return genres
 
 
     def _get(self, url:str, data: dict = None) -> dict:

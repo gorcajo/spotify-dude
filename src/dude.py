@@ -35,15 +35,16 @@ class Dude(object):
 
         for playlist in playlists:
             try:
-                spotify_songs = self.spotify.get_all_songs_from_playlist(playlist)
                 current_name = self.spotify.get_name_from_playlist(playlist)
 
                 if playlist.name != current_name:
                     playlist.name = current_name
                     self.db.update_playlist_name(playlist, current_name)
-                    self.logger.debug(f"The name of the playlist has changed to [{current_name}]")
+                    self.logger.debug(f"The name of the playlist has been changed to [{current_name}]")
                 else:
                     self.logger.debug("No change in playlist name")
+
+                spotify_songs = self.spotify.get_all_songs_from_playlist(playlist)
 
                 if playlist.songs_last_seen == len(spotify_songs):
                     self.logger.debug("There are no song changes, playlist skipped")
@@ -85,6 +86,8 @@ class Dude(object):
                     adder = all_users[spotify_song["added_by"]["id"]]
                     songs += [Song(spotify_song, adder)]
                 
+                # graphs = []
+
                 songs_added_per_user = {}
 
                 for song in songs:
@@ -92,12 +95,24 @@ class Dude(object):
                         songs_added_per_user[song.added_by.name] = 1
                     else:
                         songs_added_per_user[song.added_by.name] += 1
+
+                # self.logger.debug("Generating 'songs per user' graph...")
+                # graphs += [statsplotter.dict_as_bar_graph(songs_added_per_user, "Canciones/persona", "Canciones")]
+                # self.logger.debug("... done")
                 
-                # TODO:
-                self.logger.debug("Generating 'songs per user' graph...")
-                graph_base64 = statsplotter.dict_as_bar_graph(songs_added_per_user, "Canciones/persona", "Canciones")
-                print(graph_base64)
-                self.logger.debug("... done")
+                songs_per_genre = {}
+
+                for genre in self.spotify.get_genres_from_song_list(songs):
+                    if genre not in songs_per_genre:
+                        songs_per_genre[genre] = 1
+                    else:
+                        songs_per_genre[genre] += 1
+
+                # self.logger.debug("Generating 'songs per genre' graph...")
+                # graphs += [statsplotter.dict_as_bar_graph(songs_per_genre, "Canciones/genero", "Canciones")]
+                # self.logger.debug("... done")
+
+                # print(graphs)
 
             except:
                 self.logger.warn(f"Exception happened:\n{traceback.format_exc()}")

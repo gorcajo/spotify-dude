@@ -32,7 +32,7 @@ class Mailer(object):
 
         element = f"<h2>{playlist.name}</h2>\n"
         element += f"<p>El último en añadir una canción fue <strong>{last_adder.name}</strong>:</p>\n"
-        element += f'<p>"{song.name}" de {song.artists}</p>\n'
+        element += f'<p>"{song.name}" de {song.get_artists_str()}</p>\n'
 
         if song.cover_url is not None:
             element += f"<img src='{song.cover_url}' alt='portada'/>\n"
