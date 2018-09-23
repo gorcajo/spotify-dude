@@ -63,9 +63,9 @@ class Dude(object):
 
         if there_were_changes:
             if not self.debug_mode:
-                self.mailer.send_mail()
+                self.mailer.send_mail("Spotify update!")
             else:
-                self.mailer.dump_mail_to_file("/tmp/mail.html")
+                self.mailer.generate_body("Spotify update!", [])
 
 
     def statistics(self):
@@ -79,13 +79,15 @@ class Dude(object):
 
         for playlist in playlists:
             try:
+                # Getting all songs:
+
                 songs = []
 
                 for spotify_song in self.spotify.get_all_songs_from_playlist(playlist):
                     adder = all_users[spotify_song["added_by"]["id"]]
                     songs += [Song(spotify_song, adder)]
-                
-                # graphs = []
+
+                # Songs per user stats:
 
                 songs_added_per_user = {}
 
@@ -95,23 +97,38 @@ class Dude(object):
                     else:
                         songs_added_per_user[song.added_by.name] += 1
 
-                # self.logger.debug("Generating 'songs per user' graph...")
-                # graphs += [statsplotter.dict_as_bar_graph(songs_added_per_user, "Canciones/persona", "Canciones")]
-                # self.logger.debug("... done")
+                self.logger.debug("Generating 'songs per user' graph...")
+                # graph_path = statsplotter.dict_as_bar_graph(songs_added_per_user, "Canciones/persona", "Canciones")
+                # self.mailer.add_new_stat(graph_path)
+                self.logger.debug("... done")
+
+                # Songs per genre stats:
                 
                 songs_per_genre = {}
+                genres = []
 
-                for genre in self.spotify.get_genres_from_song_list(songs):
+                if not self.debug_mode:
+                    genres = self.spotify.get_genres_from_song_list(songs)
+                else:
+                    genres = ["rock"]*16 + ["metal"]*8 + ["blues"]*4 + ["jazz"]*2 + ["classic"]
+
+                for genre in genres:
                     if genre not in songs_per_genre:
                         songs_per_genre[genre] = 1
                     else:
                         songs_per_genre[genre] += 1
 
-                # self.logger.debug("Generating 'songs per genre' graph...")
-                # graphs += [statsplotter.dict_as_bar_graph(songs_per_genre, "Canciones/genero", "Canciones")]
-                # self.logger.debug("... done")
+                self.logger.debug("Generating 'songs per genre' graph...")
+                # graph_path = statsplotter.dict_as_bar_graph(songs_per_genre, "Canciones/genero", "Canciones")
+                # self.mailer.add_new_stat(graph_path)
+                self.logger.debug("... done")
 
-                # print(graphs)
+                # Sending mail:
+
+                if not self.debug_mode:
+                    self.mailer.send_mail("Spotify statistics!")
+                else:
+                    self.mailer.generate_body("Spotify statistics!", [])
 
             except:
                 self.logger.warn(f"Exception happened:\n{traceback.format_exc()}")

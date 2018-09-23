@@ -1,10 +1,6 @@
-# import base64
 # import matplotlib.pyplot as plt
 # import numpy as np
-# import os
-
-
-TMP_FILENAME = "/tmp/spotify-dude-stats.png"
+# import uuid
 
 
 def dict_as_bar_graph(data :dict, title: str, ylabel: str) -> str:
@@ -25,17 +21,9 @@ def dict_as_bar_graph(data :dict, title: str, ylabel: str) -> str:
     # for i, j in zip(y_pos, y_axis):
     #     plt.annotate(j, xy=(i, j), ha="center")
     
-    # return _get_image_base64()
-    pass
+    # filename = f"/tmp/{uuid.uuid1()}.png"
+    # plt.savefig(filename, format="png")
+    # plt.clf()
 
-
-def _get_image_base64() -> str:
-    # plt.savefig(TMP_FILENAME, format="png")
-
-    # with open(TMP_FILENAME, "rb") as file:
-    #     encoded_image = base64.b64encode(file.read()).decode("utf-8")
-    
-    # os.remove(TMP_FILENAME)
-
-    # return encoded_image
+    # return filename
     pass

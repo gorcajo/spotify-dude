@@ -34,7 +34,7 @@ def main():
         
         db = DbManager(logger=logger)
         spotify = SpotifyClient(logger=logger)
-        mailer = Mailer(logger=logger, db_manager=db, subject="Spotify update!")
+        mailer = Mailer(logger=logger, db_manager=db)
         dude = Dude(logger=logger, db_manager=db, spotify_client=spotify, mailer=mailer, debug_mode=args.debug)
 
         if args.roulette:
