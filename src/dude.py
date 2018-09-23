@@ -2,7 +2,6 @@
     The Spotify Dude app!
 """
 
-import base64
 import random
 import requests
 import traceback
@@ -66,7 +65,7 @@ class Dude(object):
             if not self.debug_mode:
                 self.mailer.send_mail()
             else:
-                self.mailer.dump_html_to_file("/tmp/mail.html")
+                self.mailer.dump_mail_to_file("/tmp/mail.html")
 
 
     def statistics(self):
