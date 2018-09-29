@@ -5,6 +5,7 @@ import traceback
 
 from dude import Dude
 from logger import Logger
+import dbmanager
 from dbmanager import DbManager
 from mailer import Mailer
 from spotifyclient import SpotifyClient
@@ -18,6 +19,8 @@ def main():
     group_operation = parser.add_mutually_exclusive_group(required=True)
     group_operation.add_argument("--roulette",   action="store_true", help="sends an email with the next user to add a song in every playlist")
     group_operation.add_argument("--statistics", action="store_true", help="sends a statistics mail")
+    group_operation.add_argument("--dbinstall",  action="store_true", help="installs the database")
+    group_operation.add_argument("--dbshell",    action="store_true", help="enters the SQLite shell")
 
     parser.add_argument("--debug", action="store_true", help="enables debug mode")
 
@@ -29,23 +32,29 @@ def main():
 
     logger = Logger(verbose_mode=args.verbose, silent_mode=args.silent)
 
-    try:
-        logger.info("Started")
+    if args.dbinstall:
+        dbmanager.install_database()
+    elif args.dbshell:
+        dbmanager.enter_sqlite_shell()
+    else:
+        try:
+            logger.info("Started")
+            
+            db = DbManager(logger=logger)
+            spotify = SpotifyClient(logger=logger)
+            mailer = Mailer(logger=logger, db_manager=db)
+            dude = Dude(logger=logger, db_manager=db, spotify_client=spotify, mailer=mailer, debug_mode=args.debug)
+
+            if args.roulette:
+                dude.roulette()
+            elif args.statistics:
+                dude.statistics()
+
+            logger.info("Finished")
         
-        db = DbManager(logger=logger)
-        spotify = SpotifyClient(logger=logger)
-        mailer = Mailer(logger=logger, db_manager=db)
-        dude = Dude(logger=logger, db_manager=db, spotify_client=spotify, mailer=mailer, debug_mode=args.debug)
+        except:
+            logger.error(f"Exception happened:\n{traceback.format_exc()}")
 
-        if args.roulette:
-            dude.roulette()
-        elif args.statistics:
-            dude.statistics()
 
-        logger.info("Finished")
-    
-    except:
-        logger.error(f"Exception happened:\n{traceback.format_exc()}")
-    
 if __name__ == "__main__":
     main()

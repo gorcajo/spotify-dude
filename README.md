@@ -13,38 +13,39 @@ A simple app to make colaborative Spotify playlists with friends funnier.
 
 The installation process is not friendly at all by now :(
 
-1. Clone the repo into `/opt`:
+1. Create a new app in your Spotify Developer Console: https://beta.developer.spotify.com/dashboard
+
+2. Get your Client ID and Client Secret from the app you just created.
+
+3. Get the refresh token following the instructions in `file:///opt/spotify-dude/tools/tokensgetter.html` with your browser.
+
+4. Clone the repo into `/opt`:
 ```
 git clone https://github.com/gorcajo/spotify-dude.git /opt/spotify-dude
 ```
 
-2. Install the SQLite DB:
-```
-/opt/spotify-dude/tools/db-tool.sh --installdb
-```
-
-3. Create a new app in your Spotify Developer Console: https://beta.developer.spotify.com/dashboard
-
-4. Get your Client ID and Client Secret from the app you just created.
-
-5. Get the refresh token following the instructions in `file:///opt/spotify-dude/tools/tokensgetter.html` with your browser.
-
-6. Copy the conf file template into the real conf file:
+5. Copy the conf file template into the real conf file:
 ```
 cp /opt/spotify-dude/data/dude.conf.template /opt/spotify-dude/data/dude.conf
 ```
 
-7. Fill out the conf file (see steps 4 and 5):
+6. Fill out the conf file (see steps 1 thru 3):
 ```
 vim /opt/spotify-dude/data/dude.conf
 ```
 
-8. Add a new cron entry with `crontab -e` like:
+7. Install the SQLite DB:
+```
+/opt/spotify-dude/run --dbinstall
+```
+
+8. (Optional) Run `/opt/spotify-dude/run --help` to know more about the application.
+
+9. Add a new cron entry with `crontab -e` like:
 ```
 # Spotify Dude every 5 minutes:
 */5 * * * * /opt/spotify-dude/run --roulette --silent
 ```
-(run `/opt/spotify-dude/run --help` if needed)
 
 ## III. Usage
 

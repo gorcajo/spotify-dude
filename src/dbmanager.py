@@ -1,6 +1,9 @@
 """DB manager"""
 
+import os
 import sqlite3
+import subprocess
+import sys
 from typing import List
 
 import confmanager as conf
@@ -175,3 +178,77 @@ class DbManager(object):
             log_lines += [line.strip()]
 
         self.logger.debug(' '.join(log_lines))
+
+
+def install_database():
+    db_file = conf.get("DB_FILE")
+    db_directory = "/".join(db_file.split("/")[:-1])
+
+    if not os.path.isdir(db_directory):
+        print("Application not correctly or yet installed. See 'README.md'")
+        sys.exit(1)
+
+    if os.path.isfile(db_file):
+        print("Database already installed.")
+        sys.exit(1)
+
+    qry_create_table_users = "\n".join([
+        f"CREATE TABLE IF NOT EXISTS users(",
+        f"        id INTEGER PRIMARY KEY AUTOINCREMENT,",
+        f"        name TEXT,",
+        f"        spotify_id TEXT,",
+        f"        mail TEXT",
+        f"    )",
+    ])
+
+    qry_create_table_playlists = "\n".join([
+        f"CREATE TABLE IF NOT EXISTS playlists(",
+        f"    id INTEGER PRIMARY KEY AUTOINCREMENT,",
+        f"    name TEXT,",
+        f"    spotify_id TEXT,",
+        f"    songs_last_seen INTEGER,",
+        f"    songs_hash TEXT",
+        f")",
+    ])
+
+    subprocess.run(["sqlite3", db_file, qry_create_table_users])
+    subprocess.run(["sqlite3", db_file, qry_create_table_playlists])
+
+    print("Database successfully installed.")
+
+
+def enter_sqlite_shell():
+    db_file = conf.get("DB_FILE")
+
+    if not os.path.isfile(db_file):
+        print("App not installed yet. See 'README.md'.")
+        sys.exit(1)
+        
+    subprocess.run(["sqlite3", "-header", "-column", db_file])
+
+
+# function installDb() {
+#     if [ -d $APP_DIR ]; then
+#         sqlite3 $DB_FILE "
+#             CREATE TABLE IF NOT EXISTS users(
+#                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+#                 name TEXT,
+#                 spotify_id TEXT,
+#                 mail TEXT
+#             )"
+
+#         sqlite3 $DB_FILE "
+#             CREATE TABLE IF NOT EXISTS playlists(
+#                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+#                 name TEXT,
+#                 spotify_id TEXT,
+#                 songs_last_seen INTEGER,
+#                 songs_hash TEXT
+#             )"
+
+#         echo "DB successfully installed."
+#     else
+#         echo "You must clone the app to '$APP_DIR/'. See 'README.md'"
+#         exit 5
+#     fi
+# }
