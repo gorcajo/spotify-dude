@@ -1,6 +1,6 @@
 # Spotify Dude
 
-A simple app to make colaborative Spotify playlists with friends funnier.
+A simple bot to make colaborative Spotify playlists with friends funnier.
 
 ## I. Requirements
 
@@ -13,23 +13,23 @@ A simple app to make colaborative Spotify playlists with friends funnier.
 
 The installation process is not friendly at all by now :(
 
-1. Create a new app in your Spotify Developer Console: https://beta.developer.spotify.com/dashboard
-
-2. Get your Client ID and Client Secret from the app you just created.
-
-3. Get the refresh token following the instructions in `file:///opt/spotify-dude/tools/tokensgetter.html` with your browser.
-
-4. Clone the repo into `/opt`:
+1. Clone the repo into `/opt`:
 ```
 git clone https://github.com/gorcajo/spotify-dude.git /opt/spotify-dude
 ```
 
-5. Copy the conf file template into the real conf file:
+2. Copy the conf file template into the real conf file:
 ```
 cp /opt/spotify-dude/data/dude.conf.template /opt/spotify-dude/data/dude.conf
 ```
 
-6. Fill out the conf file (see steps 1 thru 3):
+3. Create a new app in your Spotify Developer Console: https://beta.developer.spotify.com/dashboard
+
+4. Get your Client ID and Client Secret from the app you just created.
+
+5. Get the refresh token following the instructions in `file:///opt/spotify-dude/tools/tokensgetter.html` with your browser.
+
+6. Fill out the conf file (see steps 3 thru 5):
 ```
 vim /opt/spotify-dude/data/dude.conf
 ```
@@ -39,7 +39,7 @@ vim /opt/spotify-dude/data/dude.conf
 /opt/spotify-dude/run --dbinstall
 ```
 
-8. (Optional) Run `/opt/spotify-dude/run --help` to know more about the application.
+8. (Optional) Run `/opt/spotify-dude/run --help` to know more about the bot.
 
 9. Add a new cron entry with `crontab -e` like:
 ```
@@ -51,7 +51,7 @@ vim /opt/spotify-dude/data/dude.conf
 
 The process of adding friends or playlist is not friendly neither :(
 
-1. Enter the SQLite3 shell: `/opt/spotify-dude/tools/helper.sh --sqlite`
+1. Enter the SQLite3 shell: `/opt/spotify-dude/tools/run --dbshell`
 
 2. Insert some data in both `users` and `playlists` tables:
 ```
@@ -65,6 +65,6 @@ The process of adding friends or playlist is not friendly neither :(
     sqlite> ('another playlist name', 'another playlist spotify id', 0);
 ```
 
-3. Let cron do its magic.
+3. Let cron and this bot do their magic.
 
-4. See the logs at `/opt/spotify-dude/logs/` (if you left that parameter as default in `dude.conf`).
+4. You can check the logs at `/opt/spotify-dude/logs/` (if you left that parameter as default in `dude.conf`).
