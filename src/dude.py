@@ -50,14 +50,15 @@ class Dude(object):
                 spotify_songs = self.spotify.get_all_songs_from_playlist(playlist)
 
                 if playlist.songs_last_seen == len(spotify_songs):
-                    spotify_songs_hash = hashlib.md5(str(spotify_songs).encode()).hexdigest()
+                    # spotify_songs_hash = hashlib.md5(str(spotify_songs).encode()).hexdigest()
 
-                    if spotify_songs_hash == playlist.songs_hash:
-                        self.logger.debug("There are no song changes, playlist skipped")
-                    else:
-                        self.logger.debug("Somebody changed songs (before: " + playlist.songs_hash + ", now: " + spotify_songs_hash + "), an update will be made")
-                        self._update_with_changed_songs(playlist, spotify_songs, spotify_songs_hash)
-                        there_were_changes = True
+                    # if spotify_songs_hash == playlist.songs_hash:
+                    #     self.logger.debug("There are no song changes, playlist skipped")
+                    # else:
+                    #     self.logger.debug("Somebody changed songs (before: " + playlist.songs_hash + ", now: " + spotify_songs_hash + "), an update will be made")
+                    #     self._update_with_changed_songs(playlist, spotify_songs, spotify_songs_hash)
+                    #     there_were_changes = True
+                    pass
 
                 elif playlist.songs_last_seen < len(spotify_songs):
                     self.logger.debug("Somebody added songs (before: " + str(playlist.songs_last_seen) + ", now: " + str(len(spotify_songs)) + "), an update will be made")
