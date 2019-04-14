@@ -207,7 +207,7 @@ class Dude(object):
         all_users = self.db.get_all_users()
         songs = self._convert_spotify_songs(spotify_songs, all_users)
         most_recent_song = self._obtain_most_recent_song(songs)
-        self.logger.debug("After changes, most recent song is '" + most_recent_song + "'")
+        self.logger.debug("After changes, most recent song is '" + most_recent_song.name + "'")
 
         next_adder = random.choice(all_users)
         self.logger.debug("Next random adder: '" + next_adder.name + "'")
