@@ -28,33 +28,33 @@ class DbManager(object):
         """Returns the user with the given Spotify ID """
 
         with sqlite3.connect(self.db_file) as conn:
+            conn.set_trace_callback(self._log_query)
             conn.row_factory = sqlite3.Row
 
-            qry = f"SELECT * FROM users WHERE spotify_id = '{spotify_id}'"
-            self._log_query(qry)
-            rows = conn.cursor().execute(qry).fetchall()
+            qry = "SELECT * FROM users WHERE spotify_id = ?"
+            rows = conn.cursor().execute(qry, [spotify_id]).fetchall()
 
-            self.logger.debug(f"... gotten {len(rows)} rows")
+            self.logger.debug("... gotten " + str(len(rows)) + " rows")
 
             if not rows:
                 return None
             elif len(rows) == 1:
                 return User(rows[0])
             else:
-                raise DbError(f"Found more than one user with spotify_id = '{spotify_id}'")
+                raise DbError("Found more than one user with spotify_id = " + str({spotify_id}))
 
 
     def find_playlist_by_spotify_id(self, spotify_id: str) -> Playlist:
         """Returns the playlist with the given Spotify ID"""
 
         with sqlite3.connect(self.db_file) as conn:
+            conn.set_trace_callback(self._log_query)
             conn.row_factory = sqlite3.Row
 
-            qry = f"SELECT * FROM playlists WHERE spotify_id = '{spotify_id}'"
-            self._log_query(qry)
-            rows = conn.cursor().execute(qry).fetchall()
+            qry = "SELECT * FROM playlists WHERE spotify_id = ?"
+            rows = conn.cursor().execute(qry, [spotify_id]).fetchall()
 
-            self.logger.debug(f"... gotten {len(rows)} rows")
+            self.logger.debug("... gotten " + str(len(rows)) + " rows")
 
             if not rows:
                 return None
@@ -68,67 +68,65 @@ class DbManager(object):
         """Updates the playlist's songs"""
 
         with sqlite3.connect(self.db_file) as conn:
+            conn.set_trace_callback(self._log_query)
             conn.row_factory = sqlite3.Row
 
             qry = "\n".join([
-                f"UPDATE",
-                f"  playlists",
-                f"SET",
-                f"  name = '{new_name}'",
-                f"WHERE",
-                f"  id = {playlist.id}",
+                "UPDATE",
+                "  playlists",
+                "SET",
+                "  name = ?",
+                "WHERE",
+                "  id = ?",
             ])
 
-            self._log_query(qry)
-
-            conn.cursor().execute(qry)
+            conn.cursor().execute(qry, [new_name, playlist.id])
             
-            self.logger.debug(f"... done")
+            self.logger.debug("... done")
 
 
     def update_playlist_songs(self, playlist: Playlist, new_song_count: int, new_hash: str):
         """Updates the playlist's songs"""
-
+        
         with sqlite3.connect(self.db_file) as conn:
+            conn.set_trace_callback(self._log_query)
             conn.row_factory = sqlite3.Row
 
             qry = "\n".join([
-                f"UPDATE",
-                f"  playlists",
-                f"SET",
-                f"  songs_last_seen = {new_song_count},",
-                f"  songs_hash = '{new_hash}'",
-                f"WHERE",
-                f"  id = {playlist.id}",
+                "UPDATE",
+                "  playlists",
+                "SET",
+                "  songs_last_seen = ?,",
+                "  songs_hash = ?",
+                "WHERE",
+                "  id = ?",
             ])
 
-            self._log_query(qry)
-
-            conn.cursor().execute(qry)
+            conn.cursor().execute(qry, [new_song_count, new_hash, playlist.id])
+            conn.commit()
             
-            self.logger.debug(f"... done")
+            self.logger.debug("... done")
     
 
     def update_playlist_songs_hash(self, playlist: Playlist, new_hash: str):
         """Updates the playlist's songs hash"""
 
         with sqlite3.connect(self.db_file) as conn:
+            conn.set_trace_callback(self._log_query)
             conn.row_factory = sqlite3.Row
 
             qry = "\n".join([
-                f"UPDATE",
-                f"  playlists",
-                f"SET",
-                f"  songs_hash = '{new_hash}'",
-                f"WHERE",
-                f"  id = {playlist.id}",
+                "UPDATE",
+                "  playlists",
+                "SET",
+                "  songs_hash = ?",
+                "WHERE",
+                "  id = ?",
             ])
 
-            self._log_query(qry)
-
-            conn.cursor().execute(qry)
+            conn.cursor().execute(qry, [new_hash, playlist.id])
             
-            self.logger.debug(f"... done")
+            self.logger.debug("... done")
 
 
     def get_all_users(self) -> List[User]:
@@ -137,13 +135,13 @@ class DbManager(object):
         users = []
 
         with sqlite3.connect(self.db_file) as conn:
+            conn.set_trace_callback(self._log_query)
             conn.row_factory = sqlite3.Row
 
             qry = "SELECT * FROM users"
-            self._log_query(qry)
             rows = conn.cursor().execute(qry).fetchall()
 
-            self.logger.debug(f"... gotten {len(rows)} rows")
+            self.logger.debug("... gotten " + str(len(rows)) + " rows")
 
             for row in rows:
                 users.append(User(row))
@@ -157,13 +155,13 @@ class DbManager(object):
         playlists = []
 
         with sqlite3.connect(self.db_file) as conn:
+            conn.set_trace_callback(self._log_query)
             conn.row_factory = sqlite3.Row
 
             qry = "SELECT * FROM playlists"
-            self._log_query(qry)
             rows = conn.cursor().execute(qry).fetchall()
             
-            self.logger.debug(f"... gotten {len(rows)} rows")
+            self.logger.debug("... gotten " + str(len(rows)) + " rows")
 
             for row in rows:
                 playlists.append(Playlist(row))
@@ -193,22 +191,22 @@ def install_database():
         sys.exit(1)
 
     qry_create_table_users = "\n".join([
-        f"CREATE TABLE IF NOT EXISTS users(",
-        f"        id INTEGER PRIMARY KEY AUTOINCREMENT,",
-        f"        name TEXT,",
-        f"        spotify_id TEXT,",
-        f"        mail TEXT",
-        f"    )",
+        "CREATE TABLE IF NOT EXISTS users(",
+        "    id INTEGER PRIMARY KEY AUTOINCREMENT,",
+        "    name TEXT,",
+        "    spotify_id TEXT,",
+        "    mail TEXT",
+        ")",
     ])
 
     qry_create_table_playlists = "\n".join([
-        f"CREATE TABLE IF NOT EXISTS playlists(",
-        f"    id INTEGER PRIMARY KEY AUTOINCREMENT,",
-        f"    name TEXT,",
-        f"    spotify_id TEXT,",
-        f"    songs_last_seen INTEGER,",
-        f"    songs_hash TEXT",
-        f")",
+        "CREATE TABLE IF NOT EXISTS playlists(",
+        "    id INTEGER PRIMARY KEY AUTOINCREMENT,",
+        "    name TEXT,",
+        "    spotify_id TEXT,",
+        "    songs_last_seen INTEGER,",
+        "    songs_hash TEXT",
+        ")",
     ])
 
     subprocess.run(["sqlite3", db_file, qry_create_table_users])

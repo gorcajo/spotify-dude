@@ -14,7 +14,7 @@ class User(object):
 
 
     def __str__(self):
-        return f"ID={self.id}, Name='{self.name}', SpotifyID='{self.spotify_id}', Mail='{self.mail}'"
+        return "ID=" + str(self.id) + ", Name='" + self.name + "', SpotifyID='" + self.spotify_id + "', Mail='" + self.mail + "'"
 
 
     def __repr__(self):
@@ -33,7 +33,7 @@ class Playlist(object):
 
 
     def __str__(self):
-        return f"ID={self.id}, Name='{self.name}', SpotifyID='{self.spotify_id}'"
+        return "ID=" + str(self.id) + ", Name='" + str(self.name) + "', SpotifyID='" + str(self.spotify_id) + "'"
 
 
     def __repr__(self):
@@ -83,7 +83,7 @@ class Song(object):
 
 
     def __str__(self):
-        return f"'{self.name}' by '{self.get_artists_str()}' added by '{self.added_by.name}'"
+        return "'" + self.name + "' by '" + self.get_artists_str() + "' added by '" + self.added_by.name + "'"
 
 
     def __repr__(self):

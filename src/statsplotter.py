@@ -25,7 +25,7 @@ def plot_as_bar_graph(plottable: Plottable) -> str:
     for i, j in zip(y_pos, y_axis):
         plt.annotate(j, xy=(i, j), ha="center")
     
-    filename = f"/tmp/{uuid.uuid1()}.png"
+    filename = "/tmp/" + str(uuid.uuid1()) + ".png"
     plt.savefig(filename, format="png")
     plt.clf()
 
@@ -49,7 +49,7 @@ def plot_as_line_graph(plottable: Plottable) -> str:
     plt.title(plottable.title)
     plt.ylabel(plottable.ylabel)
     
-    filename = f"/tmp/{uuid.uuid1()}.png"
+    filename = "/tmp/" + str(uuid.uuid1()) + ".png"
     plt.savefig(filename, format="png")
     plt.clf()
 

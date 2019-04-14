@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 
 import argparse
 import traceback
@@ -53,7 +53,7 @@ def main():
             logger.info("Finished")
         
         except:
-            logger.error(f"Exception happened:\n{traceback.format_exc()}")
+            logger.error("Exception happened:\n" + traceback.format_exc())
 
 
 if __name__ == "__main__":

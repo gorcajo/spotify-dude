@@ -50,7 +50,7 @@ class Logger(object):
 
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
-        full_msg = f"{level} | {timestamp} | {msg}"
+        full_msg = level + " | " + timestamp + " | " + msg
 
         with open(self.log_filename, "a") as file:
             file.write(full_msg + "\n")

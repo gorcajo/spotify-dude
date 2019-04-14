@@ -44,7 +44,7 @@ class Dude(object):
                 if playlist.name != current_name:
                     playlist.name = current_name
                     self.db.update_playlist_name(playlist, current_name)
-                    self.logger.debug(f"The name of the playlist has been changed to [{current_name}]")
+                    self.logger.debug("The name of the playlist has been changed to '" + current_name + "'")
                 else:
                     self.logger.debug("No change in playlist name")
 
@@ -56,23 +56,23 @@ class Dude(object):
                     if spotify_songs_hash == playlist.songs_hash:
                         self.logger.debug("There are no song changes, playlist skipped")
                     else:
-                        self.logger.debug(f"Somebody changed songs (before: {playlist.songs_hash}, now: {spotify_songs_hash}), an update will be made")
+                        self.logger.debug("Somebody changed songs (before: " + playlist.songs_hash + ", now: " + spotify_songs_hash + "), an update will be made")
                         self._update_with_changed_songs(playlist, spotify_songs, spotify_songs_hash)
                         there_were_changes = True
 
                 elif playlist.songs_last_seen < len(spotify_songs):
-                    self.logger.debug(f"Somebody added songs (before: {playlist.songs_last_seen}, now: {len(spotify_songs)}), an update will be made")
+                    self.logger.debug("Somebody added songs (before: " + str(playlist.songs_last_seen) + ", now: " + str(len(spotify_songs)) + "), an update will be made")
                     self._update_with_added_song(playlist, spotify_songs)
                     there_were_changes = True
 
                 else:
-                    self.logger.debug(f"Somebody deleted songs (before: {playlist.songs_last_seen}, now: {len(spotify_songs)}), an update will be made")
+                    self.logger.debug("Somebody deleted songs (before: " + str(playlist.songs_last_seen) + ", now: " + len(spotify_songs) + "), an update will be made")
                     spotify_songs_hash = hashlib.md5(str(spotify_songs).encode()).hexdigest()
                     self._update_with_deleted_songs(playlist, len(spotify_songs), spotify_songs_hash)
                     there_were_changes = True
 
             except:
-                self.logger.warn(f"Exception happened:\n{traceback.format_exc()}")
+                self.logger.warn("Exception happened:\n" + traceback.format_exc())
 
         self.logger.debug("There are no more playlists to check")
 
@@ -139,13 +139,15 @@ class Dude(object):
 
                         for song in songs:
                             if week == song.added_at.isocalendar()[1] and year == song.added_at.year:
-                                if f"{year}-{week}" not in activity:
-                                    activity[f"{year}-{week}"] = 1
+                                yearweek = year + "-" + week
+
+                                if yearweek not in activity:
+                                    activity[yearweek] = 1
                                 else:
-                                    activity[f"{year}-{week}"] += 1
+                                    activity[yearweek] += 1
                             else:
-                                if f"{year}-{week}" not in activity:
-                                    activity[f"{year}-{week}"] = 0
+                                if yearweek not in activity:
+                                    activity[yearweek] = 0
 
                 for value in activity.values():
                     plottable.add_value("", value)
@@ -165,23 +167,23 @@ class Dude(object):
                     self.mailer.generate_body("Spotify statistics!", [])
 
             except:
-                self.logger.warn(f"Exception happened:\n{traceback.format_exc()}")
+                self.logger.warn("Exception happened:\n" + traceback.format_exc())
     
 
     def _update_with_added_song(self, playlist: Playlist, spotify_songs: List[dict]):
-        self.logger.debug(f"Retrieving the last song added along with its data")
+        self.logger.debug("Retrieving the last song added along with its data")
 
         all_users = self.db.get_all_users()
         songs = self._convert_spotify_songs(spotify_songs, all_users)
         most_recent_song = self._obtain_most_recent_song(songs)
-        self.logger.debug(f"Most recently added song song was [{most_recent_song}]")
+        self.logger.debug("Most recently added song song was '" + str(most_recent_song) + "'")
 
         next_adder = most_recent_song.added_by
 
         while next_adder.id == most_recent_song.added_by.id:
             next_adder = random.choice(all_users)
 
-        self.logger.debug(f"Next random adder: [{next_adder.name}]")
+        self.logger.debug("Next random adder: '" + next_adder.name + "'")
 
         self.mailer.add_new_event_as_new_song(playlist, most_recent_song.added_by, most_recent_song, next_adder)
 
@@ -191,10 +193,10 @@ class Dude(object):
     
 
     def _update_with_deleted_songs(self, playlist: Playlist, current_song_count: int, new_songs_hash: str):
-        self.logger.debug(f"Getting all users from DB to do the lottery...")
+        self.logger.debug("Getting all users from DB to do the lottery...")
         all_users = self.db.get_all_users()
         next_adder = random.choice(all_users)
-        self.logger.debug(f"Next random adder: [{next_adder.name}]")
+        self.logger.debug("Next random adder: '" + next_adder.name + "'")
 
         self.mailer.add_new_event_as_deleted_song(playlist, next_adder)
 
@@ -206,10 +208,10 @@ class Dude(object):
         all_users = self.db.get_all_users()
         songs = self._convert_spotify_songs(spotify_songs, all_users)
         most_recent_song = self._obtain_most_recent_song(songs)
-        self.logger.debug(f"After changes, most recent song is [{most_recent_song}]")
+        self.logger.debug("After changes, most recent song is '" + most_recent_song + "'")
 
         next_adder = random.choice(all_users)
-        self.logger.debug(f"Next random adder: [{next_adder.name}]")
+        self.logger.debug("Next random adder: '" + next_adder.name + "'")
 
         self.mailer.add_new_event_as_changed_songs(playlist, most_recent_song, next_adder)
 
