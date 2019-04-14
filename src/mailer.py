@@ -5,7 +5,6 @@ import imghdr
 import os
 import smtplib
 import requests
-from typing import List
 
 import confmanager as conf
 from dbmanager import DbManager
@@ -24,7 +23,7 @@ class Mailer(object):
         Mailer class for manage mailing
     """
 
-    def __init__(self, logger: Logger, db_manager: DbManager):
+    def __init__(self, logger, db_manager):
         self.logger = logger
         self.db = db_manager
         self.new_songs = []
@@ -33,7 +32,7 @@ class Mailer(object):
         self.stats = []
 
 
-    def add_new_event_as_new_song(self, playlist: Playlist, last_adder: User, song: Song, next_adder: User):
+    def add_new_event_as_new_song(self, playlist, last_adder, song, next_adder):
         """Adds a new element"""
 
         self.new_songs += [{
@@ -44,7 +43,7 @@ class Mailer(object):
         }]
 
 
-    def add_new_event_as_deleted_song(self, playlist: Playlist, next_adder: User):
+    def add_new_event_as_deleted_song(self, playlist, next_adder):
         """Adds a new element"""
 
         self.deleted_songs += [{
@@ -53,7 +52,7 @@ class Mailer(object):
         }]
 
 
-    def add_new_event_as_changed_songs(self, playlist: Playlist, most_recent_song: Song, next_adder: User):
+    def add_new_event_as_changed_songs(self, playlist, most_recent_song, next_adder):
         """Adds a new element"""
 
         self.changed_songs += [{
@@ -63,13 +62,13 @@ class Mailer(object):
         }]
 
 
-    def add_new_graph(self, imagepath: str):
+    def add_new_graph(self, imagepath):
         """Adds a new element"""
 
         self.stats += [imagepath]
 
 
-    def send_mail(self, subject: str):
+    def send_mail(self, subject):
         """Sends an email"""
 
         self.logger.debug("Getting all mail receivers from DB...")
@@ -86,7 +85,7 @@ class Mailer(object):
         self.logger.debug("... email sent")
     
 
-    def generate_body(self, subject: str, receivers: List[User]) -> str:
+    def generate_body(self, subject, receivers):
         self.logger.debug("Generating email contents...")
 
         receivers_elements = [receiver.name + "<" + receiver.mail + ">" for receiver in receivers]
@@ -211,7 +210,7 @@ class Mailer(object):
         return body
 
 
-def _guess_file_format_from_base64(base64_string: str) -> str:
+def _guess_file_format_from_base64(base64_string):
     sample = base64_string.strip()[:44]
     sample_bytes = base64.b64decode(sample)
 

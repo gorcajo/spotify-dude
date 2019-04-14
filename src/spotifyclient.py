@@ -3,7 +3,6 @@
 import base64
 import json
 import requests
-from typing import List
 
 import confmanager as conf
 from entities import Playlist
@@ -27,7 +26,7 @@ class SpotifyClient(object):
     BASE_URL = "https://api.spotify.com/v1"
 
 
-    def __init__(self, logger: Logger):
+    def __init__(self, logger):
         self.logger = logger
 
         self.logger.debug("Initializing Spotify API client...")
@@ -55,7 +54,7 @@ class SpotifyClient(object):
         self.logger.debug("... success, access key gotten: '" + self._access_token[:8] + "..." + self._access_token[-8:] + "'")
 
 
-    def get_name_from_playlist(self, playlist: Playlist) -> str:
+    def get_name_from_playlist(self, playlist):
         """Returns the name of the playlist given its ID"""
 
         self.logger.debug("Getting the name of the playlist with SpotifyID ["  + playlist.spotify_id + "] from Spotify API...")
@@ -65,7 +64,7 @@ class SpotifyClient(object):
         return response["name"]
 
 
-    def get_all_songs_from_playlist(self, playlist: Playlist) -> dict:
+    def get_all_songs_from_playlist(self, playlist):
         """Returns a list of Spotify's track objects corresponding to the playlist ID given"""
 
         self.logger.debug("Getting all songs in '" + playlist.name + "' from Spotify API...")
@@ -89,7 +88,7 @@ class SpotifyClient(object):
         return tracks
 
 
-    def get_genres_from_song_list(self, songs: List[Song]) -> List[str]:
+    def get_genres_from_song_list(self, songs):
         """Returns a list of genres associated with the song's artist"""
 
         self.logger.debug("Getting all genres associated with " + str(len(songs)) + " songs from Spotify API...")
@@ -98,7 +97,7 @@ class SpotifyClient(object):
 
         for song in songs:
             for artist in song.artists:
-                response = self._get("{SpotifyClient.BASE_URL}/artists/{artist.spotify_id}")
+                response = self._get(SpotifyClient.BASE_URL + "/artists/" + artist.spotify_id)
                 genres += response["genres"]
 
         self.logger.debug("... gotten " + str(len(genres)))
@@ -106,7 +105,7 @@ class SpotifyClient(object):
         return genres
 
 
-    def _get(self, url:str, data: dict = None) -> dict:
+    def _get(self, url, data = None):
         headers = {"Authorization": "Bearer " + self._access_token}
         response = requests.get(url, headers=headers, data=data)
 

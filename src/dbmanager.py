@@ -19,12 +19,12 @@ class DbError(Exception):
 
 class DbManager(object):
 
-    def __init__(self, logger: Logger):
+    def __init__(self, logger):
         self.logger = logger
         self.db_file = conf.get("DB_FILE")
 
 
-    def find_user_by_spotify_id(self, spotify_id: int) -> User:
+    def find_user_by_spotify_id(self, spotify_id):
         """Returns the user with the given Spotify ID """
 
         with sqlite3.connect(self.db_file) as conn:
@@ -44,7 +44,7 @@ class DbManager(object):
                 raise DbError("Found more than one user with spotify_id = " + str({spotify_id}))
 
 
-    def find_playlist_by_spotify_id(self, spotify_id: str) -> Playlist:
+    def find_playlist_by_spotify_id(self, spotify_id):
         """Returns the playlist with the given Spotify ID"""
 
         with sqlite3.connect(self.db_file) as conn:
@@ -64,7 +64,7 @@ class DbManager(object):
                 raise DbError("Found more than one playlist with spotify_id = '" + spotify_id + "'")
 
 
-    def update_playlist_name(self, playlist: Playlist, new_name: str):
+    def update_playlist_name(self, playlist, new_name):
         """Updates the playlist's songs"""
 
         with sqlite3.connect(self.db_file) as conn:
@@ -85,7 +85,7 @@ class DbManager(object):
             self.logger.debug("... done")
 
 
-    def update_playlist_songs(self, playlist: Playlist, new_song_count: int, new_hash: str):
+    def update_playlist_songs(self, playlist, new_song_count, new_hash):
         """Updates the playlist's songs"""
         
         with sqlite3.connect(self.db_file) as conn:
@@ -108,7 +108,7 @@ class DbManager(object):
             self.logger.debug("... done")
     
 
-    def update_playlist_songs_hash(self, playlist: Playlist, new_hash: str):
+    def update_playlist_songs_hash(self, playlist, new_hash):
         """Updates the playlist's songs hash"""
 
         with sqlite3.connect(self.db_file) as conn:
@@ -129,7 +129,7 @@ class DbManager(object):
             self.logger.debug("... done")
 
 
-    def get_all_users(self) -> List[User]:
+    def get_all_users(self):
         """Returns a list with all users"""
 
         users = []
@@ -149,7 +149,7 @@ class DbManager(object):
         return users
 
 
-    def get_all_playlists(self) -> List[Playlist]:
+    def get_all_playlists(self):
         """Returns a list with all playlists"""
 
         playlists = []
@@ -169,7 +169,7 @@ class DbManager(object):
         return playlists
     
 
-    def _log_query(self, query: str):
+    def _log_query(self, query):
         log_lines = []
 
         for line in query.splitlines():

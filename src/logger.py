@@ -8,7 +8,7 @@ import confmanager as conf
 
 class Logger(object):
 
-    def __init__(self, verbose_mode: bool = True, silent_mode: bool = False):
+    def __init__(self, verbose_mode = True, silent_mode = False):
         if verbose_mode and silent_mode:
             raise ValueError()
 
@@ -22,27 +22,27 @@ class Logger(object):
         pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
 
 
-    def debug(self, msg: str):
+    def debug(self, msg):
         """Logs a message with DEBUG level"""
         self._log("DEBUG", msg)
 
 
-    def info(self, msg: str):
+    def info(self, msg):
         """Logs a message with INFO level"""
         self._log("INFO ", msg)
 
 
-    def warn(self, msg: str):
+    def warn(self, msg):
         """Logs a message with WARN level"""
         self._log("WARN ", msg)
 
 
-    def error(self, msg: str):
+    def error(self, msg):
         """Logs a message with ERROR level"""
         self._log("ERROR", msg)
 
 
-    def _log(self, level: str, msg: str):
+    def _log(self, level, msg):
         """Logs a message with a level"""
 
         if level not in ["DEBUG", "INFO ", "WARN ", "ERROR"]:

@@ -5,7 +5,7 @@ import uuid
 from entities import Plottable
 
 
-def plot_as_bar_graph(plottable: Plottable) -> str:
+def plot_as_bar_graph(plottable):
     x_axis = []
     y_axis = []
 
@@ -32,7 +32,7 @@ def plot_as_bar_graph(plottable: Plottable) -> str:
     return filename
 
 
-def plot_as_line_graph(plottable: Plottable) -> str:
+def plot_as_line_graph(plottable):
     x_axis = []
     y_axis = []
 

@@ -6,7 +6,7 @@ from typing import List
 class User(object):
     """User entity"""
 
-    def __init__(self, row: Row):
+    def __init__(self, row):
         self.id = row["id"]
         self.name = row["name"]
         self.spotify_id = row["spotify_id"]
@@ -24,7 +24,7 @@ class User(object):
 class Playlist(object):
     """Playlist entity"""
 
-    def __init__(self, row: Row):
+    def __init__(self, row):
         self.id = row["id"]
         self.name = row["name"]
         self.spotify_id = row["spotify_id"]
@@ -42,7 +42,7 @@ class Playlist(object):
 
 class Artist(object):
 
-    def __init__(self, spotify_artist: dict):
+    def __init__(self, spotify_artist):
         self.name = spotify_artist["name"]
         self.spotify_id = spotify_artist["id"]
 
@@ -57,7 +57,7 @@ class Artist(object):
 
 class Song(object):
 
-    def __init__(self, spotify_song: dict, added_by: User):
+    def __init__(self, spotify_song, added_by):
         self.spotify_id = spotify_song["track"]["id"]
         self.name = spotify_song["track"]["name"]
         self.album_spotify_id = spotify_song["track"]["album"]["id"]
@@ -101,17 +101,17 @@ class Song(object):
 
 class Plottable(object):
 
-    def __init__(self, title: str, ylabel: str, data: dict = None):
+    def __init__(self, title, ylabel, data = None):
         self.title = title
         self.ylabel = ylabel
-        self.x_axis: List[str] = []
-        self.y_axis: List[int] = []
+        self.x_axis = []
+        self.y_axis = []
 
         if data is not None:
             for key, value in data.items():
                 self.add_value(key, value)
     
 
-    def add_value(self, x_value: str, y_value: int):
+    def add_value(self, x_value, y_value):
         self.x_axis += [x_value]
         self.y_axis += [y_value]

@@ -14,5 +14,5 @@ with open(CONF_FILE) as file:
             conf_data[key] = value
 
 
-def get(key: str) -> str:
+def get(key):
     return conf_data[key]

@@ -7,7 +7,6 @@ import hashlib
 import random
 import requests
 import traceback
-from typing import List
 
 from entities import Playlist
 from entities import Song
@@ -22,7 +21,7 @@ import statsplotter
 
 class Dude(object):
     
-    def __init__(self, logger: Logger, db_manager: DbManager, spotify_client: SpotifyClient, mailer: Mailer, debug_mode: bool = True):
+    def __init__(self, logger, db_manager, spotify_client, mailer, debug_mode = True):
         self.logger = logger
         self.db = db_manager
         self.spotify = spotify_client
@@ -170,7 +169,7 @@ class Dude(object):
                 self.logger.warn("Exception happened:\n" + traceback.format_exc())
     
 
-    def _update_with_added_song(self, playlist: Playlist, spotify_songs: List[dict]):
+    def _update_with_added_song(self, playlist, spotify_songs):
         self.logger.debug("Retrieving the last song added along with its data")
 
         all_users = self.db.get_all_users()
@@ -192,7 +191,7 @@ class Dude(object):
             self.db.update_playlist_songs(playlist, len(songs), new_songs_hash)
     
 
-    def _update_with_deleted_songs(self, playlist: Playlist, current_song_count: int, new_songs_hash: str):
+    def _update_with_deleted_songs(self, playlist, current_song_count, new_songs_hash):
         self.logger.debug("Getting all users from DB to do the lottery...")
         all_users = self.db.get_all_users()
         next_adder = random.choice(all_users)
@@ -204,7 +203,7 @@ class Dude(object):
             self.db.update_playlist_songs(playlist, current_song_count, new_songs_hash)
     
 
-    def _update_with_changed_songs(self, playlist: Playlist, spotify_songs: List[dict], new_hash: str):
+    def _update_with_changed_songs(self, playlist, spotify_songs, new_hash):
         all_users = self.db.get_all_users()
         songs = self._convert_spotify_songs(spotify_songs, all_users)
         most_recent_song = self._obtain_most_recent_song(songs)
@@ -219,7 +218,7 @@ class Dude(object):
             self.db.update_playlist_songs_hash(playlist, new_hash)
 
 
-    def _convert_spotify_songs(self, spotify_songs: List[dict], users: List[User]) -> List[Song]:
+    def _convert_spotify_songs(self, spotify_songs, users):
         users_dict = {}
 
         for user in users:
@@ -235,8 +234,8 @@ class Dude(object):
         return songs
 
 
-    def _obtain_most_recent_song(self, songs: List[Song]):
-        most_recent_song: Song = None
+    def _obtain_most_recent_song(self, songs):
+        most_recent_song = None
         most_recent_added_at = datetime.datetime.now() - datetime.timedelta(days=1000*365)
 
         for song in songs:
@@ -247,8 +246,8 @@ class Dude(object):
         return most_recent_song
 
 
-    def _obtain_oldest_song(self, songs: List[Song]):
-        most_recent_song: Song = None
+    def _obtain_oldest_song(self, songs):
+        most_recent_song = None
         most_recent_added_at = datetime.datetime.now() + datetime.timedelta(days=1000*365)
 
         for song in songs:
